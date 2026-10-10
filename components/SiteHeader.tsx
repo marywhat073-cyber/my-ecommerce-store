@@ -35,6 +35,7 @@ export function SiteHeader() {
           <Link href="/products?category=Home" className="hover:text-leaf">{t("nav.home")}</Link>
           <Link href="/products?category=Kitchen" className="hover:text-leaf">{t("nav.kitchen")}</Link>
           <Link href="/products?category=Wellness" className="hover:text-leaf">{t("nav.wellness")}</Link>
+          <Link href="/admin" className="hover:text-leaf">{t("nav.adminDashboard")}</Link>
           <Link href="/account" className="inline-flex items-center gap-1 rounded-full bg-sage px-3 py-2 text-xs font-semibold text-forest hover:bg-sage/70">
             <Store size={15} />
             {user?.store ? t("nav.sellerDashboard") : t("nav.sellerAccount")}
@@ -76,6 +77,7 @@ export function SiteHeader() {
         <Link href="/products?category=Home">{t("nav.home")}</Link>
         <Link href="/products?category=Kitchen">{t("nav.kitchen")}</Link>
         <Link href="/products?category=Wellness">{t("nav.wellness")}</Link>
+        <Link href="/admin">{t("nav.adminDashboard")}</Link>
         <Link href="/account" className="inline-flex items-center gap-1 font-semibold text-forest">
           <Store size={14} />
           {user?.store ? t("nav.sellerDashboard") : t("nav.sellerAccount")}

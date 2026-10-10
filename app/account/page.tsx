@@ -96,10 +96,6 @@ export default function AccountPage() {
       setError(t("account.error.depositAmount"));
       return;
     }
-    if (walletAction === "Withdrawal" && value > (user?.walletBalance ?? 0)) {
-      setError(t("account.error.withdrawalBalance"));
-      return;
-    }
     const accountNumber = String(data.get("accountNumber") ?? "").trim();
     const accountName = String(data.get("accountName") ?? "").trim();
     const receiptLast5 = String(data.get("receiptLast5") ?? "").trim();
@@ -407,7 +403,7 @@ export default function AccountPage() {
                   <li key={transaction.id} className="rounded-lg border border-black/10 p-3 text-xs">
                     <div className="flex justify-between gap-3">
                       <span className="font-medium">{t(`account.${transaction.type.toLowerCase()}`)} · {transaction.method === "K Pay" ? t("wallet.method.kpay") : t("wallet.method.wave")}</span>
-                      <span className="font-semibold">{formatPrice(transaction.amount)}</span>
+                      <span className="text-right font-semibold">{formatPrice(transaction.amount)}<span className="mt-1 block font-normal text-muted">{t(transaction.status === "Rejected" ? "wallet.rejected" : transaction.status === "Approved" ? "wallet.approved" : "wallet.pendingReview")}</span></span>
                     </div>
                     <p className="mt-1 text-muted">{t("wallet.from")}: ••••{transaction.accountNumberLast4 ?? "—"} · {new Date(transaction.createdAt).toLocaleString(language)}</p>
                     <p className="mt-1 text-muted">{t("wallet.receiptReference")}: {transaction.receiptLast5 ? `${t("wallet.receiptDigitsShort")} ${transaction.receiptLast5}` : transaction.receiptUploaded ? t("wallet.uploaded") : "—"}</p>

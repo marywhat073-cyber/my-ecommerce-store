@@ -37,6 +37,7 @@ export type WalletTransaction = {
   accountNumberLast4?: string;
   receiptLast5?: string;
   receiptUploaded?: boolean;
+  status?: "Pending" | "Approved" | "Rejected";
 };
 export type CustomerOrder = {
   id: string;
@@ -125,6 +126,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (userId) window.localStorage.setItem(SESSION_KEY, userId);
     else window.localStorage.removeItem(SESSION_KEY);
   }, [hydrated, users, userId, sellerProducts, orders, transactions]);
+
+  useEffect(() => {
+    if (!hydrated || users.length === 0) return;
+    void Promise.all(users.map(async ({ userId: registeredUserId, name, phone }) => {
+      const response = await fetch("/api/account/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: registeredUserId, name, phone }),
+      });
+      if (!response.ok) {
+        throw new Error(`Account sync failed with status ${response.status}.`);
+      }
+    })).catch((error: unknown) => {
+      console.error("Unable to synchronize local accounts with the admin dashboard.", error);
+    });
+  }, [hydrated, users]);
 
   const storedUser = users.find((account) => account.userId === userId);
   const user = useMemo<AccountUser | null>(
@@ -217,24 +234,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const recordWalletTransaction = useCallback(
     (transaction: Omit<WalletTransaction, "id" | "userId" | "createdAt">) => {
       if (!userId) throw new Error("account.error.generic");
-      setUsers((current) =>
-        current.map((account) =>
-          account.userId === userId
-            ? {
-                ...account,
-                walletBalance:
-                  account.walletBalance +
-                  (transaction.type === "Deposit" ? transaction.amount : -transaction.amount),
-              }
-            : account,
-        ),
-      );
       setTransactions((current) => [
         {
           ...transaction,
           id: `TX-${Date.now()}`,
           userId,
           createdAt: new Date().toISOString(),
+          status: "Pending",
         },
         ...current,
       ]);

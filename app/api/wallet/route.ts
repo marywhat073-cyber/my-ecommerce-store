@@ -3,8 +3,6 @@ const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 const MAX_REQUEST_BYTES = MAX_RECEIPT_BYTES + 1024 * 1024;
-const PAYMENT_METHODS = new Set(["K Pay", "Wave Money"]);
-const TRANSACTION_TYPES = new Set(["Deposit", "Withdrawal"]);
 const RECEIPT_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 const TELEGRAM_RETRY_LIMIT = 3;
 const DEFAULT_ADMIN_CHAT_ID = "8074618542";
@@ -47,6 +45,14 @@ function validText(value: FormDataEntryValue | null, maximumLength: number) {
     : "";
 }
 
+function isTransactionType(value: string): value is "Deposit" | "Withdrawal" {
+  return value === "Deposit" || value === "Withdrawal";
+}
+
+function isPaymentMethod(value: string): value is "K Pay" | "Wave Money" {
+  return value === "K Pay" || value === "Wave Money";
+}
+
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError("wallet.error.origin", 403);
   if (isRateLimited(request)) return jsonError("wallet.error.rateLimit", 429);
@@ -78,7 +84,7 @@ export async function POST(request: Request) {
   const receiptValue = form.get("receipt");
   const receipt = receiptValue instanceof File && receiptValue.size > 0 ? receiptValue : null;
 
-  if (!TRANSACTION_TYPES.has(transactionType) || !PAYMENT_METHODS.has(method)) {
+  if (!isTransactionType(transactionType) || !isPaymentMethod(method)) {
     return jsonError("wallet.error.invalidRequest", 400);
   }
   if (!accountNumber || !/^[\d+\-\s()]{5,64}$/.test(accountNumber) || !accountName || !userId || !userName || !userPhone) {
@@ -95,6 +101,12 @@ export async function POST(request: Request) {
   }
   if (receipt && (receipt.size > MAX_RECEIPT_BYTES || !RECEIPT_TYPES.has(receipt.type))) {
     return jsonError("wallet.error.invalidReceiptFile", 400);
+  }
+  if (transactionType === "Withdrawal") {
+    const walletBalance = await getAdminUserBalance(userId);
+    if (walletBalance === null || Number(amount) > walletBalance) {
+      return jsonError("account.error.withdrawalBalance", 400);
+    }
   }
 
   const amountLabel = `${Number(amount).toLocaleString("en-US")} MMK`;
@@ -168,7 +180,29 @@ export async function POST(request: Request) {
       }
       return jsonError("wallet.error.telegramUnavailable", 502);
     }
-    if (telegramResponse.ok && telegramPayload.ok) return Response.json({ ok: true });
+    if (telegramResponse.ok && telegramPayload.ok) {
+      try {
+        const transaction = await createAdminTransaction({
+          userId,
+          userName,
+          userPhone,
+          type: transactionType,
+          method,
+          accountNumber,
+          accountName,
+          amount: Number(amount),
+          receiptLast5: receiptLast5 || undefined,
+          receiptUploaded: Boolean(receipt),
+          receiptData: receipt
+            ? `data:${receipt.type};base64,${Buffer.from(await receipt.arrayBuffer()).toString("base64")}`
+            : undefined,
+        });
+        return Response.json({ ok: true, transactionId: transaction.id });
+      } catch (error) {
+        console.error("Telegram accepted a wallet notification, but the pending transaction could not be saved.", error);
+        return jsonError("wallet.error.telegramUnavailable", 503);
+      }
+    }
 
     lastDescription = "description" in telegramPayload && typeof telegramPayload.description === "string"
       ? telegramPayload.description
@@ -197,3 +231,4 @@ export async function POST(request: Request) {
   });
   return jsonError("wallet.error.telegramRejected", 502);
 }
+import { createAdminTransaction, getAdminUserBalance } from "@/lib/admin-store";

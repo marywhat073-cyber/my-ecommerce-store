@@ -9,6 +9,8 @@ npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 .vercel
+data/admin-store.json
+data/admin-store.json.*.tmp
 
 # Local Netlify folder
 .netlify
