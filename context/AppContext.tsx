@@ -129,16 +129,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!hydrated || users.length === 0) return;
-    void Promise.all(users.map(async ({ userId: registeredUserId, name, phone }) => {
-      const response = await fetch("/api/account/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: registeredUserId, name, phone }),
-      });
+    void fetch("/api/account/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        users: users.map(({ userId: registeredUserId, name, phone }) => ({
+          userId: registeredUserId,
+          name,
+          phone,
+        })),
+      }),
+    }).then((response) => {
       if (!response.ok) {
         throw new Error(`Account sync failed with status ${response.status}.`);
       }
-    })).catch((error: unknown) => {
+    }).catch((error: unknown) => {
       console.error("Unable to synchronize local accounts with the admin dashboard.", error);
     });
   }, [hydrated, users]);

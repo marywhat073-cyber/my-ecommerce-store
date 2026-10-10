@@ -1,4 +1,4 @@
-import { syncRegisteredUser } from "@/lib/admin-store";
+import { syncRegisteredUsers } from "@/lib/admin-store";
 
 function isSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
@@ -18,25 +18,32 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
-  if (
-    typeof body !== "object" ||
-    body === null ||
-    !("userId" in body) ||
-    typeof body.userId !== "string" ||
-    !/^USER-\d{6}$/.test(body.userId) ||
-    !("name" in body) ||
-    typeof body.name !== "string" ||
-    !("phone" in body) ||
-    typeof body.phone !== "string"
-  ) {
+  if (typeof body !== "object" || body === null || !("users" in body) || !Array.isArray(body.users) || body.users.length > 1000) {
     return Response.json({ error: "Invalid account details." }, { status: 400 });
   }
   try {
-    await syncRegisteredUser({
-      userId: body.userId,
-      name: body.name.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ").trim().slice(0, 120),
-      phone: body.phone.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim().slice(0, 24),
-    });
+    const users: { userId: string; name: string; phone: string }[] = [];
+    for (const item of body.users) {
+      if (
+        typeof item !== "object" ||
+        item === null ||
+        !("userId" in item) ||
+        typeof item.userId !== "string" ||
+        !/^USER-\d{6}$/.test(item.userId) ||
+        !("name" in item) ||
+        typeof item.name !== "string" ||
+        !("phone" in item) ||
+        typeof item.phone !== "string"
+      ) {
+        return Response.json({ error: "Invalid account details." }, { status: 400 });
+      }
+      users.push({
+        userId: item.userId,
+        name: item.name.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ").trim().slice(0, 120),
+        phone: item.phone.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim().slice(0, 24),
+      });
+    }
+    await syncRegisteredUsers(users);
     return Response.json({ ok: true });
   } catch (error) {
     console.error("Unable to synchronize a local account to the admin dashboard.", error);

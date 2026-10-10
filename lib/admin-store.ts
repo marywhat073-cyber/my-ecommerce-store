@@ -36,7 +36,7 @@ type AdminStore = {
   transactions: AdminTransactionRecord[];
 };
 
-const storePath = process.env.ADMIN_DATA_FILE || path.join(process.cwd(), "data", "admin-store.json");
+const storePath = path.join(process.cwd(), "data", "admin-store.json");
 let pendingWrite: Promise<void> = Promise.resolve();
 
 async function readStore(): Promise<AdminStore> {
@@ -84,15 +84,17 @@ async function updateStore<T>(update: (store: AdminStore) => T): Promise<T> {
   return result;
 }
 
-export async function syncRegisteredUser(input: Omit<AdminUserRecord, "createdAt" | "walletBalance">) {
+export async function syncRegisteredUsers(inputs: Omit<AdminUserRecord, "createdAt" | "walletBalance">[]) {
   await updateStore((store) => {
-    const existing = store.users.find((user) => user.userId === input.userId);
-    if (existing) {
-      existing.name = input.name;
-      existing.phone = input.phone;
-      return;
+    for (const input of inputs) {
+      const existing = store.users.find((user) => user.userId === input.userId);
+      if (existing) {
+        existing.name = input.name;
+        existing.phone = input.phone;
+      } else {
+        store.users.push({ ...input, walletBalance: 0, createdAt: new Date().toISOString() });
+      }
     }
-    store.users.push({ ...input, walletBalance: 0, createdAt: new Date().toISOString() });
   });
 }
 

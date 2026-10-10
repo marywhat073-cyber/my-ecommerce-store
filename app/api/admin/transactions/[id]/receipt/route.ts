@@ -20,7 +20,7 @@ export async function GET(
       "Content-Length": String(bytes.byteLength),
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
-      "Content-Disposition": "inline",
+      "Content-Disposition": "attachment; filename=\"wallet-receipt\"",
     },
   });
 }

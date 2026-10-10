@@ -186,7 +186,7 @@ export default function AdminPage() {
                     <div><dt className="text-xs text-muted">Phone number</dt><dd>{transaction.userPhone}</dd></div>
                     <div><dt className="text-xs text-muted">Account name</dt><dd>{transaction.accountName}</dd></div>
                     <div><dt className="text-xs text-muted">Account number</dt><dd>{transaction.accountNumber}</dd></div>
-                    <div><dt className="text-xs text-muted">Receipt / last 5 digits</dt><dd>{transaction.receiptLast5 || (transaction.receiptUploaded ? <a className="text-forest underline" href={`/api/admin/transactions/${encodeURIComponent(transaction.id)}/receipt`} target="_blank" rel="noreferrer">View uploaded receipt</a> : "—")}</dd></div>
+                    <div><dt className="text-xs text-muted">Receipt / last 5 digits</dt><dd>{transaction.receiptLast5}{transaction.receiptLast5 && transaction.receiptUploaded ? " · " : ""}{transaction.receiptUploaded ? <a className="text-forest underline" href={`/api/admin/transactions/${encodeURIComponent(transaction.id)}/receipt`}>Download uploaded receipt</a> : !transaction.receiptLast5 ? "—" : null}</dd></div>
                     {transaction.reviewedAt && <div><dt className="text-xs text-muted">Reviewed</dt><dd>{new Date(transaction.reviewedAt).toLocaleString()}</dd></div>}
                     {transaction.reviewNote && <div className="sm:col-span-2"><dt className="text-xs text-muted">Review note</dt><dd>{transaction.reviewNote}</dd></div>}
                   </dl>
