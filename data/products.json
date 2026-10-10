@@ -1,0 +1,139 @@
+[
+  {
+    "id": "linen-throw",
+    "slug": "washed-linen-throw",
+    "name": "Washed Linen Throw",
+    "category": "Home",
+    "price": 68,
+    "compareAtPrice": 84,
+    "rating": 4.9,
+    "reviewCount": 128,
+    "badge": "Bestseller",
+    "description": "A wonderfully soft, airy layer for slow mornings and quiet evenings. Woven from European flax linen and finished with relaxed, hand-knotted fringe.",
+    "details": ["100% European flax linen", "Naturally breathable and stonewashed", "130 × 180 cm · Made in Portugal"],
+    "images": [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "ceramic-vase",
+    "slug": "sculpted-ceramic-vase",
+    "name": "Sculpted Ceramic Vase",
+    "category": "Home",
+    "price": 42,
+    "rating": 4.8,
+    "reviewCount": 86,
+    "badge": "Handmade",
+    "description": "An expressive silhouette, shaped by hand and glazed in a warm, earthy finish. Beautiful with a few garden stems or simply on its own.",
+    "details": ["Hand-thrown stoneware", "Food-safe matte glaze", "Approx. 22 cm · Each piece is unique"],
+    "images": [
+      "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1576021182211-9ea8dced3690?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "everyday-tote",
+    "slug": "everyday-canvas-tote",
+    "name": "Everyday Canvas Tote",
+    "category": "Accessories",
+    "price": 34,
+    "rating": 4.7,
+    "reviewCount": 64,
+    "badge": "",
+    "description": "Your everyday carry-all, made to go everywhere. A sturdy, thoughtfully sized canvas bag with comfortable shoulder straps and a little inside pocket.",
+    "details": ["Recycled heavyweight cotton canvas", "Interior slip pocket", "38 × 42 cm · Machine washable"],
+    "images": [
+      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "botanical-candle",
+    "slug": "botanical-soy-candle",
+    "name": "Botanical Soy Candle",
+    "category": "Wellness",
+    "price": 28,
+    "rating": 5,
+    "reviewCount": 203,
+    "badge": "Loved",
+    "description": "Light a softer kind of evening. A small-batch, clean-burning candle blended with cedar, bergamot, and the greenest hint of fig.",
+    "details": ["100% natural soy wax", "Cotton wick · Phthalate-free fragrance", "45-hour burn time · Poured by hand"],
+    "images": [
+      "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1602523961358-f9f03dd557db?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "oak-board",
+    "slug": "solid-oak-serving-board",
+    "name": "Solid Oak Serving Board",
+    "category": "Kitchen",
+    "price": 56,
+    "rating": 4.8,
+    "reviewCount": 92,
+    "badge": "",
+    "description": "A beautiful, hard-working board for everyday prep and effortless hosting. Made from solid, responsibly sourced oak with a naturally lovely grain.",
+    "details": ["Responsibly sourced European oak", "Finished with food-safe natural oil", "45 × 18 cm · Handmade in the EU"],
+    "images": [
+      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "field-notebook",
+    "slug": "recycled-paper-notebook",
+    "name": "Recycled Paper Notebook",
+    "category": "Stationery",
+    "price": 18,
+    "rating": 4.6,
+    "reviewCount": 51,
+    "badge": "",
+    "description": "A lovely place for lists, thoughts, and plans that might change. Smooth, substantial recycled pages are easy on your pen and on the planet.",
+    "details": ["100% post-consumer recycled paper", "Lay-flat binding · 160 lined pages", "A5 size · Printed with soy inks"],
+    "images": [
+      "https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "wool-slippers",
+    "slug": "felted-wool-slippers",
+    "name": "Felted Wool Slippers",
+    "category": "Wellness",
+    "price": 74,
+    "rating": 4.9,
+    "reviewCount": 117,
+    "badge": "Small batch",
+    "description": "A little ritual of comfort for your home. Naturally insulating merino wool keeps feet cozy without overheating, while a cushioned sole makes every step softer.",
+    "details": ["Mulesing-free merino wool felt", "Cushioned recycled-felt sole", "Handmade in small batches"],
+    "images": [
+      "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1200&q=85"
+    ]
+  },
+  {
+    "id": "glass-carafe",
+    "slug": "recycled-glass-carafe",
+    "name": "Recycled Glass Carafe",
+    "category": "Kitchen",
+    "price": 38,
+    "rating": 4.7,
+    "reviewCount": 73,
+    "badge": "",
+    "description": "Bring a little everyday occasion to your table. This softly tinted, recycled-glass carafe is shaped for easy pouring and feels lovely in your hand.",
+    "details": ["100% recycled glass", "Dishwasher safe", "1 litre · Hand-finished in Spain"],
+    "images": [
+      "https://images.unsplash.com/photo-1513558161293-cdaf765edfd7?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=1200&q=85"
+    ]
+  }
+]
