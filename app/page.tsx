@@ -13,7 +13,7 @@ export default function HomePage() {
     <>
       <section className="page-wrap pb-12 pt-7 md:pb-20 md:pt-10">
         <div className="relative min-h-[500px] overflow-hidden rounded-2xl bg-[#e8e6dc] md:min-h-[570px]">
-          <Image
+          <
             src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=90"
             alt="Warm, natural textures in a calm living room"
             fill
