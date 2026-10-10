@@ -17,6 +17,13 @@ export type AccountUser = {
   phone: string;
   isSeller: boolean;
   walletBalance: number;
+  store: StoreProfile | null;
+};
+
+export type StoreProfile = {
+  name: string;
+  address: string;
+  categories: string[];
 };
 
 type StoredUser = AccountUser & { passwordHash: string };
@@ -24,7 +31,7 @@ export type WalletTransaction = {
   id: string;
   userId: string;
   type: "Deposit" | "Withdrawal";
-  method: "K Pay" | "Wave Pay";
+  method: "K Pay" | "Wave Money" | "Wave Pay";
   amount: number;
   createdAt: string;
 };
@@ -51,7 +58,7 @@ type AppContextValue = {
   register: (details: { name: string; phone: string; password: string }) => Promise<void>;
   login: (phone: string, password: string) => Promise<void>;
   logout: () => void;
-  enableSellerMode: () => void;
+  createSellerStore: (store: StoreProfile) => void;
   addSellerProduct: (product: Product) => void;
   addOrder: (order: CustomerOrder) => void;
   recordWalletTransaction: (
@@ -125,6 +132,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         phone: storedUser.phone,
         isSeller: storedUser.isSeller,
         walletBalance: storedUser.walletBalance,
+        store: storedUser.store ?? null,
       }
       : null,
     [storedUser],
@@ -132,16 +140,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async ({ name, phone, password }: { name: string; phone: string; password: string }) => {
-      if (!hydrated) throw new Error("Account data is still loading.");
+      if (!hydrated)       throw new Error("account.error.loadingData");
       const normalizedPhone = normalizePhone(phone);
       if (!/^\+?\d{7,15}$/.test(normalizedPhone)) {
-        throw new Error("Enter a valid phone number with 7 to 15 digits.");
+        throw new Error("account.error.validPhone");
       }
       if (password.length < 6) {
-        throw new Error("Password must be a 6-digit PIN or at least 6 characters.");
+        throw new Error("account.error.passwordLength");
       }
       if (users.some((account) => account.phone === normalizedPhone)) {
-        throw new Error("An account with this phone number already exists.");
+        throw new Error("account.error.phoneExists");
       }
       let newUserId = "";
       do {
@@ -153,6 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         phone: normalizedPhone,
         isSeller: false,
         walletBalance: 0,
+        store: null,
         passwordHash: await hashPassword(password),
       };
       setUsers((current) => [...current, account]);
@@ -170,21 +179,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
           candidate.phone === normalizedPhone &&
           candidate.passwordHash === passwordHash,
       );
-      if (!account) throw new Error("Phone number or password is incorrect.");
+      if (!account) throw new Error("account.error.login");
       setUserId(account.userId);
     },
     [users],
   );
 
   const logout = useCallback(() => setUserId(""), []);
-  const enableSellerMode = useCallback(() => {
-    if (!userId) return;
+  const createSellerStore = useCallback((store: StoreProfile) => {
+    if (!userId) throw new Error("account.error.generic");
+    const name = store.name.trim();
+    const address = store.address.trim();
+    const categories = [...new Set(store.categories.map((category) => category.trim()).filter(Boolean))];
+    if (!name || !address || categories.length === 0) {
+      throw new Error("account.error.storeFields");
+    }
+    const account = users.find((candidate) => candidate.userId === userId);
+    if (!account) throw new Error("account.error.generic");
+    if (account.store) throw new Error("account.error.storeExists");
     setUsers((current) =>
       current.map((account) =>
-        account.userId === userId ? { ...account, isSeller: true } : account,
+        account.userId === userId
+          ? { ...account, isSeller: true, store: { name, address, categories } }
+          : account,
       ),
     );
-  }, [userId]);
+  }, [userId, users]);
   const addSellerProduct = useCallback((product: Product) => {
     setSellerProducts((current) => [product, ...current]);
   }, []);
@@ -193,7 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
   const recordWalletTransaction = useCallback(
     (transaction: Omit<WalletTransaction, "id" | "userId" | "createdAt">) => {
-      if (!userId) return;
+      if (!userId) throw new Error("account.error.generic");
       setUsers((current) =>
         current.map((account) =>
           account.userId === userId
@@ -229,7 +249,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       register,
       login,
       logout,
-      enableSellerMode,
+      createSellerStore,
       addSellerProduct,
       addOrder,
       recordWalletTransaction,
@@ -243,7 +263,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       register,
       login,
       logout,
-      enableSellerMode,
+      createSellerStore,
       addSellerProduct,
       addOrder,
       recordWalletTransaction,

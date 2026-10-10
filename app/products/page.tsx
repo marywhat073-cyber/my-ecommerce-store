@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { ProductCatalog } from "@/components/ProductCatalog";
 
 type ProductsPageProps = {

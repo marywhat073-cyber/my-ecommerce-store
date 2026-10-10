@@ -46,7 +46,7 @@ export function ProductCatalog({
   return (
     <div className="page-wrap py-10 md:py-14">
       <div className="mb-9 border-b border-ink/10 pb-8">
-        <p className="eyebrow">Thoughtful things for every day</p>
+        <p className="eyebrow">{t("catalog.eyebrow")}</p>
         <h1 className="section-title mt-2">{t("catalog.title")}</h1>
         <p className="mt-3 max-w-xl text-sm leading-6 text-muted">{t("catalog.subtitle")}</p>
       </div>
@@ -56,31 +56,31 @@ export function ProductCatalog({
             <span className="mb-3 flex items-center gap-2 text-sm font-semibold"><SlidersHorizontal size={16} /> {t("catalog.category")}</span>
             <select className="form-select w-full rounded-lg border-black/15 bg-white text-sm" value={category} onChange={(event) => setCategory(event.target.value)}>
               <option value="All">{t("catalog.allCategories")}</option>
-              {categories.map((item) => <option key={item.name} value={item.name}>{item.name}</option>)}
-              <option value="Stationery">Stationery</option>
+              {categories.map((item) => <option key={item.name} value={item.name}>{t(`category.${item.name}`)}</option>)}
+              <option value="Stationery">{t("category.Stationery")}</option>
             </select>
           </label>
           <label className="block">
             <span className="mb-3 flex items-center justify-between text-sm font-semibold">{t("catalog.maxPrice")} <span className="font-normal text-muted">{`MMK ${Number(maxPrice).toLocaleString()}`}</span></span>
-            <input aria-label="Maximum price" type="range" min="0" max={MAX_PRICE} step="1" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} className="w-full accent-forest" />
+            <input aria-label={t("catalog.maxPrice")} type="range" min="0" max={MAX_PRICE} step="1" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} className="w-full accent-forest" />
             <span className="mt-1 flex justify-between text-xs text-muted"><span>MMK 10</span><span>MMK 1,000,000</span></span>
           </label>
           <label className="block">
             <span className="mb-3 block text-sm font-semibold">{t("catalog.search")}</span>
-            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="What are you looking for?" className="form-input w-full rounded-lg border-black/15 bg-white text-sm" />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("catalog.searchPlaceholder")} className="form-input w-full rounded-lg border-black/15 bg-white text-sm" />
           </label>
           <button onClick={() => { setCategory("All"); setMaxPrice(MAX_PRICE); setSort("featured"); setSearch(""); }} className="text-sm text-muted underline underline-offset-4 hover:text-forest">{t("catalog.clear")}</button>
         </aside>
         <div>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted">{filteredProducts.length} {filteredProducts.length === 1 ? "piece" : "pieces"} to love</p>
+            <p className="text-sm text-muted">{filteredProducts.length} {t(filteredProducts.length === 1 ? "catalog.piece" : "catalog.pieces")}</p>
             <label className="flex items-center gap-2 text-sm">
               <span className="text-muted">{t("catalog.sort")}</span>
-              <select aria-label="Sort products" className="form-select rounded-lg border-black/15 bg-white py-2 text-sm" value={sort} onChange={(event) => setSort(event.target.value)}>
+            <select aria-label={t("catalog.sort")} className="form-select rounded-lg border-black/15 bg-white py-2 text-sm" value={sort} onChange={(event) => setSort(event.target.value)}>
                 <option value="featured">{t("catalog.featured")}</option>
-                <option value="price-low">Price: low to high</option>
-                <option value="price-high">Price: high to low</option>
-                <option value="rating">Top rated</option>
+              <option value="price-low">{t("catalog.priceLow")}</option>
+              <option value="price-high">{t("catalog.priceHigh")}</option>
+              <option value="rating">{t("catalog.topRated")}</option>
               </select>
             </label>
           </div>
@@ -90,8 +90,8 @@ export function ProductCatalog({
             </div>
           ) : (
             <div className="rounded-xl bg-white px-6 py-16 text-center">
-              <h2 className="font-display text-2xl">Nothing here just yet</h2>
-              <p className="mt-2 text-sm text-muted">Try adjusting your filters to find something lovely.</p>
+              <h2 className="font-display text-2xl">{t("catalog.emptyTitle")}</h2>
+              <p className="mt-2 text-sm text-muted">{t("catalog.emptyText")}</p>
             </div>
           )}
         </div>

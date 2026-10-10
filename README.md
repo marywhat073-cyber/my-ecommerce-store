@@ -34,14 +34,19 @@ To create and run a production build, use `npm run build` followed by `npm start
 - Persistent cart with quantity controls, removal, a demo promo code (`WELCOME10`), and estimated 8% tax.
 - Phone-number account registration/sign-in with an automatically assigned local User ID.
 - International phone dial-code selector, six-character password minimum, and five-language UI switcher (English, Myanmar, Thai, Chinese, Spanish).
+- Localized storefront, account, seller dashboard, wallet, and customer-service chat across all five languages.
 - Product, cart, and checkout prices display USD and the corresponding MMK value at the fixed demo exchange rate.
-- Seller mode with browser-local product listings, cost/selling prices, and uploaded product images.
+- Seller registration with a store name, address, and product categories, followed by a browser-local dashboard for product listings and orders.
+- Demo wallet deposit details for Wave Money and K Pay are shown on the account page; wallet actions remain simulated.
+- Deposit and withdrawal requests collect account details and a receipt upload or its last five digits, then notify the administrator through a server-side Telegram bot.
 - Checkout with Myanmar delivery details, optional consent-based GPS coordinates, and seller-visible order records.
-- Demo wallet actions labeled K Pay and Wave Pay, plus a fixed-reply customer-service chat widget.
+- Demo wallet actions for K Pay and Wave Money, plus a localized customer-service chat widget.
 
 ## Demo limitations
 
-This project has no backend. Account credentials, listings, wallet balances, transactions, and orders are only stored in the current browser and are not shared with other devices or sent to sellers. Browser-side password hashing is not production authentication. K Pay and Wave Pay selections only create simulated transactions; no actual deposits, withdrawals, or checkout payments occur. GPS sharing is optional and requires browser permission. Do not enter wallet PINs, payment passwords, or other sensitive payment credentials.
+Account credentials, listings, wallet balances, transactions, and orders are stored in the current browser. Wallet transactions remain simulated; no actual deposits, withdrawals, or checkout payments occur. Submitting a wallet request sends the account name and number, account holder name, phone, amount, and uploaded receipt (if provided) to the configured Telegram administrator. The current browser-only account is a demo and does not authenticate the submitted user identity. Do not enter wallet PINs or payment passwords.
+
+To enable Telegram notifications, copy `.env.example` to `.env.local` and set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_ADMIN_CHAT_ID` using server-only environment variables. Never commit bot credentials or expose them through `NEXT_PUBLIC_*` variables. Revoke and replace any bot token shared in chat, logs, or source control.
 
 Before launch, connect a trusted server for authentication, durable user/order data, seller access controls, image storage, delivery workflows, and payment-provider integrations. Enforce authorization and validate all data on the server.
 
@@ -51,6 +56,7 @@ Before launch, connect a trusted server for authentication, durable user/order d
 app/
   cart/                  Cart and order summary
   checkout/              Checkout form and confirmation
+  api/wallet/            Validated server-side Telegram notifications
   products/              Catalog and dynamic product details
 components/              Shared header, footer, cards, and cart controls
 context/                 Cart Context and local-storage persistence

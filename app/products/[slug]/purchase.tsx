@@ -14,9 +14,9 @@ export function ProductPurchase({ product }: { product: Product }) {
     <div className="mt-7">
       <p className="mb-2 text-sm font-medium">{t("product.quantity")}</p>
       <div className="mb-5 inline-flex h-11 items-center rounded-full border border-ink/15 bg-white">
-        <button aria-label="Decrease quantity" onClick={() => setQuantity((current) => Math.max(1, current - 1))} className="px-3 text-muted hover:text-forest"><Minus size={16} /></button>
+        <button aria-label={t("product.decreaseQuantity")} onClick={() => setQuantity((current) => Math.max(1, current - 1))} className="px-3 text-muted hover:text-forest"><Minus size={16} /></button>
         <span aria-live="polite" className="w-8 text-center text-sm">{quantity}</span>
-        <button aria-label="Increase quantity" onClick={() => setQuantity((current) => current + 1)} className="px-3 text-muted hover:text-forest"><Plus size={16} /></button>
+        <button aria-label={t("product.increaseQuantity")} onClick={() => setQuantity((current) => current + 1)} className="px-3 text-muted hover:text-forest"><Plus size={16} /></button>
       </div>
       <AddToCartButton product={product} quantity={quantity} />
     </div>

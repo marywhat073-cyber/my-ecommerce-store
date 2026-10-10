@@ -60,15 +60,15 @@ export default function CartPage() {
               </Link>
               <div className="flex min-w-0 flex-1 flex-col justify-between sm:flex-row sm:items-start">
                 <div>
-                  <p className="text-xs text-muted">{product.category}</p>
+                  <p className="text-xs text-muted">{t(`category.${product.category}`)}</p>
                   <Link href={`/products/${product.slug}`} className="mt-1 block font-medium hover:text-leaf">{product.name}</Link>
                   <p className="mt-2 text-xs leading-5">{formatPricePair(product.price, getProductCurrency(product))}</p>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-4 sm:mt-0 sm:flex-col sm:items-end">
                   <div className="inline-flex h-9 items-center rounded-full border border-ink/15 bg-white">
-                    <button aria-label={`Decrease ${product.name} quantity`} onClick={() => updateQuantity(product.id, quantity - 1)} className="px-2.5 text-muted hover:text-forest"><Minus size={14} /></button>
+                    <button aria-label={`${t("cart.decreaseQuantity")}: ${product.name}`} onClick={() => updateQuantity(product.id, quantity - 1)} className="px-2.5 text-muted hover:text-forest"><Minus size={14} /></button>
                     <span className="w-6 text-center text-xs">{quantity}</span>
-                    <button aria-label={`Increase ${product.name} quantity`} onClick={() => updateQuantity(product.id, quantity + 1)} className="px-2.5 text-muted hover:text-forest"><Plus size={14} /></button>
+                    <button aria-label={`${t("cart.increaseQuantity")}: ${product.name}`} onClick={() => updateQuantity(product.id, quantity + 1)} className="px-2.5 text-muted hover:text-forest"><Plus size={14} /></button>
                   </div>
                   <button onClick={() => removeItem(product.id)} className="inline-flex items-center gap-1 text-xs text-muted hover:text-red-700"><Trash2 size={14} /> {t("cart.remove")}</button>
                 </div>

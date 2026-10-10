@@ -13,9 +13,9 @@ export default function HomePage() {
     <>
       <section className="page-wrap pb-12 pt-7 md:pb-20 md:pt-10">
         <div className="relative min-h-[500px] overflow-hidden rounded-2xl bg-[#e8e6dc] md:min-h-[570px]">
-          <
+          <Image
             src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=90"
-            alt="Warm, natural textures in a calm living room"
+            alt={t("home.heroImageAlt")}
             fill
             priority
             sizes="100vw"
@@ -30,14 +30,14 @@ export default function HomePage() {
               {t("home.explore")} <ArrowRight size={17} />
             </Link>
           </div>
-          <div className="absolute bottom-5 right-6 hidden rounded-full bg-white/90 px-4 py-2 text-xs text-forest sm:block">Considered goods · Everyday prices</div>
+          <div className="absolute bottom-5 right-6 hidden rounded-full bg-white/90 px-4 py-2 text-xs text-forest sm:block">{t("home.heroBadge")}</div>
         </div>
       </section>
 
       <section className="page-wrap py-10 md:py-14">
         <div className="mb-7 flex items-end justify-between">
           <div>
-            <p className="eyebrow">Find your kind of good</p>
+            <p className="eyebrow">{t("home.categoryEyebrow")}</p>
             <h2 className="section-title mt-2">{t("home.categoryTitle")}</h2>
           </div>
           <Link href="/products" className="hidden items-center gap-2 text-sm font-medium text-forest hover:text-leaf sm:flex">{t("home.shopAll")} <MoveRight size={17} /></Link>
@@ -48,7 +48,7 @@ export default function HomePage() {
               <Image src={category.image} alt={`${category.name} collection`} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               <div className="absolute bottom-4 left-4 flex items-center gap-2 font-display text-xl text-white sm:bottom-5 sm:left-5 sm:text-2xl">
-                {category.name} <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+                {t(`category.${category.name}`)} <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
               </div>
             </Link>
           ))}
@@ -58,7 +58,7 @@ export default function HomePage() {
       <section className="page-wrap py-12 md:py-16">
         <div className="mb-7 flex items-end justify-between">
           <div>
-            <p className="eyebrow">A few good favorites</p>
+            <p className="eyebrow">{t("home.favoritesEyebrow")}</p>
             <h2 className="section-title mt-2">{t("home.favoritesTitle")}</h2>
           </div>
           <Link href="/products" className="flex items-center gap-2 text-sm font-medium text-forest hover:text-leaf">{t("home.shopAll")} <MoveRight size={17} /></Link>
@@ -71,13 +71,11 @@ export default function HomePage() {
       <section className="page-wrap py-8 md:py-14">
         <div className="grid items-center gap-8 rounded-2xl bg-sage p-7 sm:p-10 md:grid-cols-2 md:gap-12 md:p-14">
           <div>
-            <p className="eyebrow">Better things, made better</p>
+            <p className="eyebrow">{t("home.careEyebrow")}</p>
             <h2 className="mt-3 max-w-md font-display text-3xl leading-tight sm:text-4xl">{t("home.careTitle")}</h2>
           </div>
           <div>
-            <p className="max-w-lg text-sm leading-7 text-ink/75">
-              We believe the things we use every day should feel good, work hard, and tread lightly. That means natural materials, independent makers, and pieces designed to live with you for years.
-            </p>
+            <p className="max-w-lg text-sm leading-7 text-ink/75">{t("home.careText")}</p>
             <Link href="/products" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-forest">{t("home.getCollection")} <ArrowRight size={16} /></Link>
           </div>
         </div>

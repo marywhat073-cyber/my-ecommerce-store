@@ -14,25 +14,23 @@ export function SiteFooter() {
             <Sprout size={25} />
             <span className="font-display text-xl">evergreen</span>
           </Link>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-white/70">
-            Everyday things, chosen with care. Thoughtful design, natural materials, and a little more meaning in the things we keep.
-          </p>
+          <p className="mt-4 max-w-sm text-sm leading-6 text-white/70">{t("footer.description")}</p>
         </div>
         <div>
           <h2 className="text-sm font-semibold">{t("footer.explore")}</h2>
           <div className="mt-4 grid gap-3 text-sm text-white/70">
-            <Link href="/products">Shop all</Link>
-            <Link href="/products?category=Home">Home & living</Link>
-            <Link href="/products?category=Wellness">Wellness</Link>
+            <Link href="/products">{t("footer.shopAll")}</Link>
+            <Link href="/products?category=Home">{t("footer.homeLiving")}</Link>
+            <Link href="/products?category=Wellness">{t("footer.wellness")}</Link>
           </div>
         </div>
         <div>
           <h2 className="text-sm font-semibold">{t("footer.note")}</h2>
-          <p className="mt-4 text-sm leading-6 text-white/70">Good things take time. We make and source in small batches, with care at every step.</p>
+          <p className="mt-4 text-sm leading-6 text-white/70">{t("footer.noteText")}</p>
         </div>
       </div>
       <div className="border-t border-white/15 py-4 text-center text-xs text-white/55">
-        © {new Date().getFullYear()} Evergreen Market. Made for living well.
+        © {new Date().getFullYear()} {t("footer.copyright")}
       </div>
     </footer>
   );
