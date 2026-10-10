@@ -6,6 +6,8 @@ const MAX_REQUEST_BYTES = MAX_RECEIPT_BYTES + 1024 * 1024;
 const PAYMENT_METHODS = new Set(["K Pay", "Wave Money"]);
 const TRANSACTION_TYPES = new Set(["Deposit", "Withdrawal"]);
 const RECEIPT_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+const TELEGRAM_RETRY_LIMIT = 3;
+const DEFAULT_ADMIN_CHAT_ID = "8074618542";
 
 function jsonError(message: string, status: number) {
   return Response.json({ error: message }, { status });
@@ -54,8 +56,8 @@ export async function POST(request: Request) {
   }
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-  if (!botToken || !adminChatId) return jsonError("wallet.error.telegramConfig", 503);
+  const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID?.trim() || DEFAULT_ADMIN_CHAT_ID;
+  if (!botToken) return jsonError("wallet.error.telegramConfig", 503);
 
   let form: FormData;
   try {
@@ -110,56 +112,88 @@ export async function POST(request: Request) {
   ].join("\n");
 
   const endpoint = `https://api.telegram.org/bot${botToken}/${receipt ? "sendDocument" : "sendMessage"}`;
-  let telegramResponse: Response;
-  try {
-    if (receipt) {
-      const telegramForm = new FormData();
-      telegramForm.set("chat_id", adminChatId);
-      telegramForm.set("caption", details);
-      const extension = receipt.type === "application/pdf" ? "pdf" : receipt.type.split("/")[1];
-      telegramForm.set("document", receipt, `wallet-receipt.${extension}`);
-      telegramResponse = await fetch(endpoint, {
-        method: "POST",
-        body: telegramForm,
-        signal: AbortSignal.timeout(15_000),
-        cache: "no-store",
-      });
-    } else {
-      telegramResponse = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: adminChatId, text: details }),
-        signal: AbortSignal.timeout(15_000),
-        cache: "no-store",
-      });
+  let lastStatus: number | undefined;
+  let lastDescription = "No response was returned.";
+  for (let attempt = 0; attempt < TELEGRAM_RETRY_LIMIT; attempt += 1) {
+    let telegramResponse: Response;
+    try {
+      const requestInit: RequestInit = receipt
+        ? (() => {
+            const telegramForm = new FormData();
+            telegramForm.set("chat_id", adminChatId);
+            telegramForm.set("caption", details);
+            const extension = receipt.type === "application/pdf" ? "pdf" : receipt.type.split("/")[1];
+            telegramForm.set("document", receipt, `wallet-receipt.${extension}`);
+            return { method: "POST", body: telegramForm, signal: AbortSignal.timeout(10_000), cache: "no-store" };
+          })()
+        : {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: adminChatId, text: details }),
+            signal: AbortSignal.timeout(10_000),
+            cache: "no-store",
+          };
+      telegramResponse = await fetch(endpoint, requestInit);
+    } catch {
+      lastDescription = "Telegram request failed before a response was received.";
+      if (attempt + 1 < TELEGRAM_RETRY_LIMIT) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        continue;
+      }
+      return jsonError("wallet.error.telegramUnavailable", 502);
     }
-  } catch {
-    return jsonError("wallet.error.telegramUnavailable", 502);
+
+    lastStatus = telegramResponse.status;
+    let telegramPayload: unknown;
+    try {
+      telegramPayload = await telegramResponse.json();
+    } catch {
+      lastDescription = "Telegram returned an unreadable response.";
+      if (telegramResponse.status >= 500 && attempt + 1 < TELEGRAM_RETRY_LIMIT) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        continue;
+      }
+      return jsonError("wallet.error.telegramUnavailable", 502);
+    }
+    if (
+      typeof telegramPayload !== "object" ||
+      telegramPayload === null ||
+      !("ok" in telegramPayload) ||
+      typeof telegramPayload.ok !== "boolean"
+    ) {
+      lastDescription = "Telegram returned an invalid response.";
+      if (telegramResponse.status >= 500 && attempt + 1 < TELEGRAM_RETRY_LIMIT) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        continue;
+      }
+      return jsonError("wallet.error.telegramUnavailable", 502);
+    }
+    if (telegramResponse.ok && telegramPayload.ok) return Response.json({ ok: true });
+
+    lastDescription = "description" in telegramPayload && typeof telegramPayload.description === "string"
+      ? telegramPayload.description
+      : "No error description was returned.";
+    const retryable = telegramResponse.status === 429 || telegramResponse.status >= 500;
+    if (retryable && attempt + 1 < TELEGRAM_RETRY_LIMIT) {
+      const retryAfter = "parameters" in telegramPayload &&
+        typeof telegramPayload.parameters === "object" &&
+        telegramPayload.parameters !== null &&
+        "retry_after" in telegramPayload.parameters &&
+        typeof telegramPayload.parameters.retry_after === "number"
+        ? telegramPayload.parameters.retry_after
+        : 0;
+      const waitMs = retryAfter > 0
+        ? Math.min(retryAfter * 1000, 5000)
+        : 500 * (attempt + 1);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      continue;
+    }
+    break;
   }
 
-  let telegramPayload: unknown;
-  try {
-    telegramPayload = await telegramResponse.json();
-  } catch {
-    return jsonError("wallet.error.telegramUnavailable", 502);
-  }
-  if (
-    typeof telegramPayload !== "object" ||
-    telegramPayload === null ||
-    !("ok" in telegramPayload) ||
-    typeof telegramPayload.ok !== "boolean"
-  ) {
-    return jsonError("wallet.error.telegramUnavailable", 502);
-  }
-  if (!telegramResponse.ok || !telegramPayload.ok) {
-    console.error("Telegram rejected a wallet notification.", {
-      status: telegramResponse.status,
-      description: "description" in telegramPayload && typeof telegramPayload.description === "string"
-        ? telegramPayload.description
-        : "No error description was returned.",
-    });
-    return jsonError("wallet.error.telegramRejected", 502);
-  }
-
-  return Response.json({ ok: true });
+  console.error("Telegram rejected a wallet notification.", {
+    status: lastStatus,
+    description: lastDescription,
+  });
+  return jsonError("wallet.error.telegramRejected", 502);
 }

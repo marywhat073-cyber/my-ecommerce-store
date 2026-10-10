@@ -142,7 +142,14 @@ export default function AccountPage() {
         return;
       }
 
-      recordWalletTransaction({ type: walletAction, method, amount: value });
+      recordWalletTransaction({
+        type: walletAction,
+        method,
+        amount: value,
+        accountNumberLast4: accountNumber.replace(/\D/g, "").slice(-4),
+        receiptLast5: receiptLast5 || undefined,
+        receiptUploaded: Boolean(receiptFile),
+      });
       setNotice(`${t(`account.${walletAction.toLowerCase()}`)} · ${t("wallet.success")}`);
       setAmount("");
       form.reset();
@@ -379,7 +386,7 @@ export default function AccountPage() {
               <div className="grid grid-cols-2 gap-2">
                 {(["Deposit", "Withdrawal"] as const).map((action) => <button key={action} type="button" onClick={() => setWalletAction(action)} className={`rounded-full border px-3 py-2 text-sm ${walletAction === action ? "border-forest bg-sage text-forest" : "border-black/15"}`}>{t(`account.${action.toLowerCase()}`)}</button>)}
               </div>
-              {walletAction === "Deposit" && <div className="rounded-lg bg-sage p-3 text-sm"><p className="mb-2 font-semibold">{t("account.depositDetails")}</p><p>Wave Money: Mg Kyaw Zin Phyo (09775191427)</p><p>K Pay: Mg Kyaw Zin Phyo (09775191427)</p></div>}
+              {walletAction === "Deposit" && <div className="rounded-xl border border-forest/20 bg-sage/60 p-4 text-sm shadow-sm"><p className="mb-2 font-semibold text-forest">{t("account.depositDetails")}</p><p>Wave Money: Mg Kyaw Zin Phyo (09775191427)</p><p>K Pay: Mg Kyaw Zin Phyo (09775191427)</p></div>}
               <label className="block text-sm">{t("wallet.method")}<select name="method" value={method} onChange={(event) => setMethod(event.target.value as "K Pay" | "Wave Money")} className="form-select mt-2 w-full rounded-lg border-black/15"><option value="K Pay">{t("wallet.method.kpay")}</option><option value="Wave Money">{t("wallet.method.wave")}</option></select></label>
               <label className="block text-sm">{t("wallet.accountNumber")}<input name="accountNumber" required maxLength={64} autoComplete="off" className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
               <label className="block text-sm">{t("wallet.accountName")}<input name="accountName" required maxLength={120} autoComplete="off" className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
@@ -389,12 +396,26 @@ export default function AccountPage() {
                 <label className="block text-sm">{t("wallet.receiptDigits")}<input name="receiptLast5" inputMode="numeric" pattern="[0-9]{5}" maxLength={5} placeholder="12345" className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
                 <p className="text-center text-xs text-muted">{t("wallet.or")}</p>
                 <label className="block text-sm">{t("wallet.uploadReceipt")}<input name="receipt" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="form-input mt-2 w-full rounded-lg border-black/15 text-sm" /></label>
-                <p className="text-xs leading-5 text-muted">{t("wallet.receiptNotice")}</p>
               </fieldset>
               <p className="rounded-lg bg-sand p-3 text-xs leading-5 text-muted">{t("wallet.telegramPrivacy")}</p>
               <button disabled={walletSubmitting} className="button-primary w-full">{walletSubmitting ? t("wallet.submitting") : `${t("account.recordDemo")} ${t(`account.${walletAction.toLowerCase()}`).toLowerCase()}`}</button>
             </form>
-            {myTransactions.length > 0 && <div className="mt-5 border-t border-black/10 pt-4"><h3 className="text-sm font-semibold">{t("account.recentTransactions")}</h3><ul className="mt-2 space-y-2">{myTransactions.slice(0, 5).map((transaction) => <li key={transaction.id} className="flex justify-between gap-3 text-xs"><span>{t(`account.${transaction.type.toLowerCase()}`)} · {transaction.method === "K Pay" ? t("wallet.method.kpay") : t("wallet.method.wave")}</span><span>{formatPrice(transaction.amount)}</span></li>)}</ul></div>}
+            <div className="mt-5 border-t border-black/10 pt-4">
+              <h3 className="text-sm font-semibold">{t("wallet.history")}</h3>
+              <ul className="mt-3 space-y-3">
+                {myTransactions.map((transaction) => (
+                  <li key={transaction.id} className="rounded-lg border border-black/10 p-3 text-xs">
+                    <div className="flex justify-between gap-3">
+                      <span className="font-medium">{t(`account.${transaction.type.toLowerCase()}`)} · {transaction.method === "K Pay" ? t("wallet.method.kpay") : t("wallet.method.wave")}</span>
+                      <span className="font-semibold">{formatPrice(transaction.amount)}</span>
+                    </div>
+                    <p className="mt-1 text-muted">{t("wallet.from")}: ••••{transaction.accountNumberLast4 ?? "—"} · {new Date(transaction.createdAt).toLocaleString(language)}</p>
+                    <p className="mt-1 text-muted">{t("wallet.receiptReference")}: {transaction.receiptLast5 ? `${t("wallet.receiptDigitsShort")} ${transaction.receiptLast5}` : transaction.receiptUploaded ? t("wallet.uploaded") : "—"}</p>
+                  </li>
+                ))}
+                {myTransactions.length === 0 && <li className="text-sm text-muted">{t("wallet.emptyHistory")}</li>}
+              </ul>
+            </div>
           </section>
           <Link href="/products" className="flex items-center justify-between rounded-xl bg-sage p-5 text-sm font-medium text-forest">{t("account.browseCatalog")} <ArrowRight size={17} /></Link>
         </aside>

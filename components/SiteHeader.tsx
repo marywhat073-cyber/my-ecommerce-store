@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingBag, Sprout, UserRound } from "lucide-react";
+import { Search, ShoppingBag, Sprout, Store, UserRound } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -30,11 +30,15 @@ export function SiteHeader() {
           <Sprout size={27} strokeWidth={1.7} />
           <span className="font-display text-[22px] tracking-tight">evergreen</span>
         </Link>
-        <nav className="hidden items-center gap-8 text-sm font-medium text-ink/80 md:flex">
+        <nav className="hidden items-center gap-3 text-xs font-medium text-ink/80 lg:flex lg:gap-5 lg:text-sm">
           <Link href="/products" className="hover:text-leaf">{t("nav.shop")}</Link>
           <Link href="/products?category=Home" className="hover:text-leaf">{t("nav.home")}</Link>
           <Link href="/products?category=Kitchen" className="hover:text-leaf">{t("nav.kitchen")}</Link>
           <Link href="/products?category=Wellness" className="hover:text-leaf">{t("nav.wellness")}</Link>
+          <Link href="/account" className="inline-flex items-center gap-1 rounded-full bg-sage px-3 py-2 text-xs font-semibold text-forest hover:bg-sage/70">
+            <Store size={15} />
+            {user?.store ? t("nav.sellerDashboard") : t("nav.sellerAccount")}
+          </Link>
         </nav>
         <div className="flex items-center gap-3">
           <form onSubmit={handleSearch} className="hidden items-center border-b border-ink/20 pb-1 sm:flex">
@@ -67,11 +71,15 @@ export function SiteHeader() {
           </Link>
         </div>
       </div>
-      <div className="flex items-center justify-center gap-6 border-t border-black/5 px-4 py-2 text-xs md:hidden">
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-black/5 px-4 py-2 text-xs lg:hidden">
         <Link href="/products">{t("nav.shop")}</Link>
         <Link href="/products?category=Home">{t("nav.home")}</Link>
         <Link href="/products?category=Kitchen">{t("nav.kitchen")}</Link>
         <Link href="/products?category=Wellness">{t("nav.wellness")}</Link>
+        <Link href="/account" className="inline-flex items-center gap-1 font-semibold text-forest">
+          <Store size={14} />
+          {user?.store ? t("nav.sellerDashboard") : t("nav.sellerAccount")}
+        </Link>
       </div>
       <form onSubmit={handleSearch} className="flex items-center border-t border-black/5 px-5 py-2 sm:hidden">
         <input

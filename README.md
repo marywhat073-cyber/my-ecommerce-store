@@ -37,8 +37,8 @@ To create and run a production build, use `npm run build` followed by `npm start
 - Localized storefront, account, seller dashboard, wallet, and customer-service chat across all five languages.
 - Product, cart, and checkout prices display USD and the corresponding MMK value at the fixed demo exchange rate.
 - Seller registration with a store name, address, and product categories, followed by a browser-local dashboard for product listings and orders.
-- Demo wallet deposit details for Wave Money and K Pay are shown on the account page; wallet actions remain simulated.
-- Deposit and withdrawal requests collect account details and a receipt upload or its last five digits, then notify the administrator through a server-side Telegram bot.
+- Demo wallet deposit details for Wave Money and K Pay are shown on the account page; wallet actions remain simulated. The account page shows the complete local incoming/outgoing history while masking account numbers.
+- Deposit and withdrawal requests collect account details and a receipt upload or its last five digits, then notify the administrator through a server-side Telegram bot with bounded retries for temporary Telegram/network failures.
 - Checkout with Myanmar delivery details, optional consent-based GPS coordinates, and seller-visible order records.
 - Demo wallet actions for K Pay and Wave Money, plus a localized customer-service chat widget.
 
@@ -46,7 +46,7 @@ To create and run a production build, use `npm run build` followed by `npm start
 
 Account credentials, listings, wallet balances, transactions, and orders are stored in the current browser. Wallet transactions remain simulated; no actual deposits, withdrawals, or checkout payments occur. Submitting a wallet request sends the account name and number, account holder name, phone, amount, and uploaded receipt (if provided) to the configured Telegram administrator. The current browser-only account is a demo and does not authenticate the submitted user identity. Do not enter wallet PINs or payment passwords.
 
-To enable Telegram notifications, copy `.env.example` to `.env.local` and set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_ADMIN_CHAT_ID` using server-only environment variables. Never commit bot credentials or expose them through `NEXT_PUBLIC_*` variables. Revoke and replace any bot token shared in chat, logs, or source control.
+To enable Telegram notifications, copy `.env.example` to `.env.local` and set `TELEGRAM_BOT_TOKEN` using a new, server-only bot credential. The administrator chat ID defaults to `8074618542` and can be overridden with `TELEGRAM_ADMIN_CHAT_ID`. Never commit bot credentials or expose them through `NEXT_PUBLIC_*` variables. Revoke and replace any bot token shared in chat, logs, or source control.
 
 Before launch, connect a trusted server for authentication, durable user/order data, seller access controls, image storage, delivery workflows, and payment-provider integrations. Enforce authorization and validate all data on the server.
 

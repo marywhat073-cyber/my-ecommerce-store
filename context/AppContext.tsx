@@ -34,6 +34,9 @@ export type WalletTransaction = {
   method: "K Pay" | "Wave Money" | "Wave Pay";
   amount: number;
   createdAt: string;
+  accountNumberLast4?: string;
+  receiptLast5?: string;
+  receiptUploaded?: boolean;
 };
 export type CustomerOrder = {
   id: string;
