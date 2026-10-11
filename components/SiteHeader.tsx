@@ -32,13 +32,11 @@ export function SiteHeader() {
         </Link>
         <nav className="hidden items-center gap-3 text-xs font-medium text-ink/80 lg:flex lg:gap-5 lg:text-sm">
           <Link href="/products" className="hover:text-leaf">{t("nav.shop")}</Link>
-          <Link href="/products?category=Home" className="hover:text-leaf">{t("nav.home")}</Link>
-          <Link href="/products?category=Kitchen" className="hover:text-leaf">{t("nav.kitchen")}</Link>
-          <Link href="/products?category=Wellness" className="hover:text-leaf">{t("nav.wellness")}</Link>
-          <Link href="/admin" className="hover:text-leaf">{t("nav.adminDashboard")}</Link>
+          <Link href="/products?category=Home%20Appliances" className="hover:text-leaf">{t("nav.home")}</Link>
+          <Link href="/products?category=Kitchenware" className="hover:text-leaf">{t("nav.kitchen")}</Link>
           <Link href="/account" className="inline-flex items-center gap-1 rounded-full bg-sage px-3 py-2 text-xs font-semibold text-forest hover:bg-sage/70">
             <Store size={15} />
-            {user?.store ? t("nav.sellerDashboard") : t("nav.sellerAccount")}
+            {t("nav.sellerDashboard")}
           </Link>
         </nav>
         <div className="flex items-center gap-3">
@@ -54,9 +52,9 @@ export function SiteHeader() {
               <Search size={18} />
             </button>
           </form>
-          <Link href="/account" aria-label={`${t("nav.signedInAccount")}${user ? ` ${user.userId}` : ""}`} className="inline-flex items-center gap-1 rounded-full p-2 text-sm hover:bg-sage">
+          <Link href="/account" aria-label={`${t("nav.signedInAccount")} ${user?.storeId ?? ""}`} className="inline-flex items-center gap-1 rounded-full p-2 text-sm hover:bg-sage">
             <UserRound size={20} strokeWidth={1.7} />
-            <span className="hidden lg:inline">{user ? user.userId : t("nav.account")}</span>
+            <span className="hidden lg:inline">{user?.storeId}</span>
           </Link>
           <label className="sr-only" htmlFor="site-language">{t("nav.language")}</label>
           <select id="site-language" aria-label={t("nav.language")} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className="form-select max-w-[112px] rounded-full border-black/15 bg-transparent py-2 pl-3 pr-7 text-xs">
@@ -74,13 +72,11 @@ export function SiteHeader() {
       </div>
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-black/5 px-4 py-2 text-xs lg:hidden">
         <Link href="/products">{t("nav.shop")}</Link>
-        <Link href="/products?category=Home">{t("nav.home")}</Link>
-        <Link href="/products?category=Kitchen">{t("nav.kitchen")}</Link>
-        <Link href="/products?category=Wellness">{t("nav.wellness")}</Link>
-        <Link href="/admin">{t("nav.adminDashboard")}</Link>
+        <Link href="/products?category=Home%20Appliances">{t("nav.home")}</Link>
+        <Link href="/products?category=Kitchenware">{t("nav.kitchen")}</Link>
         <Link href="/account" className="inline-flex items-center gap-1 font-semibold text-forest">
           <Store size={14} />
-          {user?.store ? t("nav.sellerDashboard") : t("nav.sellerAccount")}
+          {t("nav.sellerDashboard")}
         </Link>
       </div>
       <form onSubmit={handleSearch} className="flex items-center border-t border-black/5 px-5 py-2 sm:hidden">

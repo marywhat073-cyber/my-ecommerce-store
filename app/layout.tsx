@@ -2,18 +2,16 @@ import type { Metadata } from "next";
 import { CartProvider } from "@/context/CartContext";
 import { AppProvider } from "@/context/AppContext";
 import { LocaleProvider } from "@/context/LocaleContext";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
-import { CustomerService } from "@/components/CustomerService";
+import { StoreApplication } from "@/components/StoreApplication";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Evergreen Market — Thoughtful goods for everyday living",
+    default: "Evergreen Market — Start and grow your store",
     template: "%s | Evergreen Market",
   },
   description:
-    "Discover thoughtfully made home, kitchen, wellness, and everyday essentials at Evergreen Market.",
+    "Register your store, list products without upfront inventory costs, and manage your sales in MMK and USD.",
 };
 
 export default function RootLayout({
@@ -25,10 +23,7 @@ export default function RootLayout({
         <LocaleProvider>
           <AppProvider>
             <CartProvider>
-              <SiteHeader />
-              <main className="min-h-[60vh]">{children}</main>
-              <SiteFooter />
-              <CustomerService />
+              <StoreApplication>{children}</StoreApplication>
             </CartProvider>
           </AppProvider>
         </LocaleProvider>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, LockKeyhole } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useCart } from "@/context/CartContext";
-import { formatPricePair, getProductCurrency, toMMK } from "@/lib/format";
+import { formatPricePair, getProductCurrency } from "@/lib/format";
 import { useApp } from "@/context/AppContext";
 import { useLocale } from "@/context/LocaleContext";
 
@@ -13,48 +13,49 @@ const TAX_RATE = 0.08;
 
 export default function CheckoutPage() {
   const { items, subtotal, hydrated, promoCode, clearCart } = useCart();
-  const { user, addOrder } = useApp();
+  const { user, refreshStore } = useApp();
   const { t } = useLocale();
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"K Pay" | "Wave Pay">("K Pay");
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationMessage, setLocationMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const discount = promoCode === "WELCOME10" ? subtotal * 0.1 : 0;
   const tax = (subtotal - discount) * TAX_RATE;
   const total = subtotal - discount + tax;
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (items.length === 0) return;
     const form = event.currentTarget;
     const data = new FormData(form);
-    const sellerIds = [...new Set(items.map(({ product }) => product.sellerId).filter((id): id is string => Boolean(id)))];
-    addOrder({
-      id: `ORD-${Date.now().toString(36).toUpperCase()}`,
-      buyerId: user?.userId,
-      sellerIds,
-      items: items.map(({ product, quantity }) => ({
-        name: product.name,
-        quantity,
-        sellerId: product.sellerId,
-        price: toMMK(product.price, getProductCurrency(product)),
-      })),
-      total,
-      buyerName: `${String(data.get("firstName") ?? "")} ${String(data.get("lastName") ?? "")}`.trim(),
-      buyerPhone: String(data.get("phone") ?? ""),
-      address: [
-        String(data.get("street") ?? ""),
-        String(data.get("landmark") ?? ""),
-        `${String(data.get("township") ?? "")}, ${String(data.get("city") ?? "")}`,
-        String(data.get("region") ?? ""),
-        "Myanmar",
-      ].filter(Boolean).join("\n"),
-      coordinates: coordinates ?? undefined,
-      paymentMethod,
-      createdAt: new Date().toISOString(),
-    });
-    setOrderPlaced(true);
-    clearCart();
+    const address = [
+      String(data.get("street") ?? ""),
+      String(data.get("landmark") ?? ""),
+      `${String(data.get("township") ?? "")}, ${String(data.get("city") ?? "")}`,
+      String(data.get("region") ?? ""),
+      "Myanmar",
+    ].filter(Boolean).join("\n");
+    setSubmitError("");
+    try {
+      const response = await fetch("/api/store/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map(({ product, quantity }) => ({ productId: product.id, quantity })),
+          address,
+          paymentMethod,
+          promoCode,
+        }),
+      });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error ?? "Unable to place the order.");
+      await refreshStore();
+      setOrderPlaced(true);
+      clearCart();
+    } catch (reason) {
+      setSubmitError(reason instanceof Error ? reason.message : "Unable to place the order.");
+    }
   }
 
   function captureLocation() {
@@ -115,8 +116,8 @@ export default function CheckoutPage() {
           <section>
             <h2 className="font-display text-2xl">{t("checkout.contact")}</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm">{t("checkout.firstName")}<input name="firstName" required autoComplete="given-name" defaultValue={user?.name.split(" ")[0] ?? ""} className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
-              <label className="block text-sm">{t("checkout.lastName")}<input name="lastName" required autoComplete="family-name" defaultValue={user?.name.split(" ").slice(1).join(" ")} className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
+              <label className="block text-sm">{t("checkout.firstName")}<input name="firstName" required autoComplete="given-name" defaultValue={user?.storeName.split(" ")[0] ?? ""} className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
+              <label className="block text-sm">{t("checkout.lastName")}<input name="lastName" required autoComplete="family-name" defaultValue={user?.storeName.split(" ").slice(1).join(" ") || "Store"} className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
               <label className="block text-sm sm:col-span-2">{t("checkout.phone")}<input name="phone" required type="tel" autoComplete="tel" defaultValue={user?.phone ?? ""} className="form-input mt-2 w-full rounded-lg border-black/15" /></label>
             </div>
           </section>
@@ -153,6 +154,7 @@ export default function CheckoutPage() {
             <LockKeyhole size={16} className="mt-0.5 shrink-0 text-forest" />
             {t("checkout.securityNotice")}
           </div>
+          {submitError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{submitError}</p>}
           <button type="submit" className="button-primary w-full">{t("checkout.placeOrder")} · {formatPricePair(total, "MMK")}</button>
         </form>
         <aside className="rounded-xl bg-white p-6 shadow-soft">

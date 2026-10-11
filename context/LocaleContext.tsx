@@ -10,14 +10,11 @@ import {
   type ReactNode,
 } from "react";
 
-export type Language = "en" | "my" | "th" | "zh" | "es";
-type Translation = Partial<Record<Language, string>> & { en: string };
+export type Language = "en" | "my";
+type Translation = { en: string; my?: string; [locale: string]: string | undefined };
 export const languages: { code: Language; label: string }[] = [
   { code: "en", label: "English" },
   { code: "my", label: "မြန်မာ" },
-  { code: "th", label: "ไทย" },
-  { code: "zh", label: "中文" },
-  { code: "es", label: "Español" },
 ];
 
 const translations: Record<string, Translation> = {
@@ -49,6 +46,8 @@ const translations: Record<string, Translation> = {
   "footer.shopAll": { en: "Shop all", my: "ပစ္စည်းအားလုံး ကြည့်ရန်" },
   "footer.homeLiving": { en: "Home & living", my: "အိမ်သုံးနှင့် နေထိုင်မှု" },
   "footer.wellness": { en: "Wellness", my: "ကျန်းမာရေး" },
+  "footer.homeAppliances": { en: "Home appliances", my: "အိမ်သုံးလျှပ်စစ်ပစ္စည်းများ" },
+  "footer.buildingMaterials": { en: "Building materials", my: "ဆောက်လုပ်ရေးပစ္စည်းများ" },
   "footer.noteText": { en: "Good things take time. We make and source in small batches, with care at every step.", my: "ကောင်းမွန်သော ပစ္စည်းများ ဖန်တီးရန် အချိန်ယူရပါသည်။ အဆင့်တိုင်းကို ဂရုစိုက်၍ အနည်းငယ်စီ ထုတ်လုပ်၊ ရွေးချယ်ပါသည်။" },
   "footer.copyright": { en: "Evergreen Market. Made for living well.", my: "Evergreen Market။ ကောင်းမွန်စွာ နေထိုင်နိုင်ရန် ဖန်တီးထားသည်။" },
   "catalog.title": { en: "The collection", my: "ကုန်ပစ္စည်းများ", th: "สินค้าทั้งหมด", zh: "商品目录", es: "La colección" },
@@ -91,11 +90,18 @@ const translations: Record<string, Translation> = {
   "category.Technology": { en: "Technology", my: "နည်းပညာပစ္စည်းများ", th: "เทคโนโลยี", zh: "数码科技", es: "Tecnología" },
   "category.Travel": { en: "Travel", my: "ခရီးသွား", th: "การเดินทาง", zh: "旅行", es: "Viaje" },
   "category.Pets": { en: "Pets", my: "အိမ်မွေးတိရစ္ဆာန်", th: "สัตว์เลี้ยง", zh: "宠物", es: "Mascotas" },
+  "category.Men's Clothing": { en: "Men's clothing", my: "အမျိုးသားဝတ် အဝတ်အစားများ" },
+  "category.Women's Clothing": { en: "Women's clothing", my: "အမျိုးသမီးဝတ် အဝတ်အစားများ" },
+  "category.Home Appliances": { en: "Home appliances", my: "အိမ်သုံးလျှပ်စစ်ပစ္စည်းများ" },
+  "category.Kitchenware": { en: "Kitchenware", my: "မီးဖိုချောင်သုံးပစ္စည်းများ" },
+  "category.Building Materials": { en: "Building materials", my: "ဆောက်လုပ်ရေးပစ္စည်းများ" },
   "badge.Bestseller": { en: "Bestseller", my: "အရောင်းရဆုံး" },
   "badge.Handmade": { en: "Handmade", my: "လက်လုပ်" },
   "badge.Loved": { en: "Loved", my: "လူကြိုက်များ" },
   "badge.Small batch": { en: "Small batch", my: "အနည်းငယ်စီ ထုတ်လုပ်ထားသည်" },
   "badge.Own Store": { en: "Own Store", my: "ကိုယ်ပိုင်ဆိုင်" },
+  "badge.Store Listed": { en: "Store Listed", my: "ဆိုင်စာရင်းတင်ပြီး" },
+  "badge.New Arrival": { en: "New Arrival", my: "အသစ်ရောက်ရှိ" },
   "nav.language": { en: "Language", my: "ဘာသာစကား" },
   "nav.searchProducts": { en: "Search products", my: "ကုန်ပစ္စည်းများ ရှာဖွေရန်" },
   "nav.submitSearch": { en: "Submit search", my: "ရှာဖွေမည်" },
@@ -105,7 +111,7 @@ const translations: Record<string, Translation> = {
   "nav.sellerAccount": { en: "Seller account", my: "ရောင်းချသူအကောင့်", th: "บัญชีผู้ขาย", zh: "卖家账户", es: "Cuenta de vendedor" },
   "nav.sellerDashboard": { en: "Seller dashboard", my: "ရောင်းချသူ ဒက်ရှ်ဘုတ်", th: "แดชบอร์ดผู้ขาย", zh: "卖家面板", es: "Panel del vendedor" },
   "account.loading": { en: "Loading your account…", my: "သင့်အကောင့်ကို ဖွင့်နေသည်…" },
-  "account.registrationNotice": { en: "Registration assigns a unique local ID such as USER-123456. Passwords are hashed in this browser only; use a secure server for real accounts.", my: "မှတ်ပုံတင်ပြီးနောက် USER-123456 ကဲ့သို့ သီးသန့် ID တစ်ခု သတ်မှတ်ပေးပါမည်။ စကားဝှက်များကို ဤဘရောက်ဆာတွင်သာ hash လုပ်ထားပါသည်။ အမှန်တကယ်အကောင့်များအတွက် လုံခြုံသော server ကို အသုံးပြုပါ။" },
+  "account.registrationNotice": { en: "Every store receives a unique Store ID. Passwords are stored as salted hashes on the server.", my: "ဆိုင်တိုင်းတွင် သီးသန့် Store ID ရရှိမည်။ စကားဝှက်များကို ဆားထည့်ထားသော hash အဖြစ် server တွင် သိမ်းဆည်းသည်။" },
   "account.yourAccount": { en: "Your account", my: "သင့်အကောင့်" },
   "account.hello": { en: "Hello", my: "မင်္ဂလာပါ" },
   "account.userId": { en: "User ID", my: "အသုံးပြုသူ ID" },
@@ -245,7 +251,7 @@ const translations: Record<string, Translation> = {
   "account.toggleToSignIn": { en: "Already have an account? Sign in", my: "အကောင့်ရှိပြီးသားလား။ ဝင်ပါ", th: "มีบัญชีแล้ว? เข้าสู่ระบบ", zh: "已有账户？登录", es: "¿Ya tienes cuenta? Inicia sesión" },
   "account.toggleToRegister": { en: "New here? Create an account", my: "အသစ်လား။ အကောင့်ဖွင့်ပါ", th: "สมาชิกใหม่? สร้างบัญชี", zh: "新用户？创建账户", es: "¿Nuevo aquí? Crea una cuenta" },
   "account.phonePlaceholder": { en: "Enter phone number", my: "ဖုန်းနံပါတ်ထည့်ပါ", th: "กรอกหมายเลขโทรศัพท์", zh: "输入电话号码", es: "Introduce tu teléfono" },
-  "account.authDescription": { en: "Use a phone number and password. This browser-only demo is not production authentication.", my: "ဖုန်းနံပါတ်နှင့် စကားဝှက်ကို အသုံးပြုပါ။ ဤဘရောက်ဆာသီးသန့် စမ်းသပ်မှုသည် အမှန်တကယ်အကောင့်စနစ် မဟုတ်ပါ။", th: "ใช้หมายเลขโทรศัพท์และรหัสผ่าน การสาธิตนี้ทำงานในเบราว์เซอร์เท่านั้น ไม่ใช่ระบบยืนยันตัวตนจริง", zh: "使用电话号码和密码。此演示仅在浏览器中运行，并非正式身份验证。", es: "Usa un teléfono y una contraseña. Esta demostración solo funciona en el navegador y no es autenticación real." },
+  "account.authDescription": { en: "Create a server-backed store account with your phone number and password.", my: "ဖုန်းနံပါတ်နှင့် စကားဝှက်ကို အသုံးပြုပြီး server ပေါ်တွင် ဆိုင်အကောင့်ဖန်တီးပါ။", th: "ใช้หมายเลขโทรศัพท์และรหัสผ่าน การสาธิตนี้ทำงานในเบราว์เซอร์เท่านั้น ไม่ใช่ระบบยืนยันตัวตนจริง", zh: "使用电话号码和密码。此演示仅在浏览器中运行，并非正式身份验证。", es: "Usa un teléfono y una contraseña. Esta demostración solo funciona en el navegador y no es autenticación real." },
   "product.quantity": { en: "Quantity", my: "အရေအတွက်", th: "จำนวน", zh: "数量", es: "Cantidad" },
   "product.decreaseQuantity": { en: "Decrease quantity", my: "အရေအတွက် လျှော့ရန်" },
   "product.increaseQuantity": { en: "Increase quantity", my: "အရေအတွက် တိုးရန်" },
@@ -319,7 +325,7 @@ const translations: Record<string, Translation> = {
   "common.loading": { en: "Loading...", my: "ဖွင့်နေသည်...", th: "กำลังโหลด...", zh: "加载中...", es: "Cargando..." },
 };
 
-const supplementalTranslations: Partial<Record<Language, Record<string, string>>> = {
+const supplementalTranslations: Record<string, Record<string, string>> = {
   th: {
     "home.heroImageAlt": "พื้นผิวธรรมชาติอบอุ่นในห้องนั่งเล่นที่สงบ",
     "home.heroBadge": "สินค้าคัดสรรอย่างใส่ใจ · ราคาสำหรับทุกวัน",

@@ -3,13 +3,13 @@ import "server-only";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
-export const ADMIN_SESSION_COOKIE = "evergreen-admin-session";
+export const CUSTOMER_SERVICE_SESSION_COOKIE = "evergreen-customer-service-session";
 const SESSION_DURATION_SECONDS = 8 * 60 * 60;
 
 function sessionSecret() {
-  const secret = process.env.ADMIN_SESSION_SECRET;
+  const secret = process.env.CUSTOMER_SERVICE_SESSION_SECRET;
   if (!secret || secret.length < 32) {
-    throw new Error("ADMIN_SESSION_SECRET must contain at least 32 characters.");
+    throw new Error("CUSTOMER_SERVICE_SESSION_SECRET must contain at least 32 characters.");
   }
   return secret;
 }
@@ -24,9 +24,9 @@ function normalizePhone(value: string) {
   return digits;
 }
 
-export function verifyAdminCredentials(phone: string, password: string) {
-  const configuredPhone = process.env.ADMIN_PHONE;
-  const configuredPassword = process.env.ADMIN_PASSWORD;
+export function verifyCustomerServiceCredentials(phone: string, password: string) {
+  const configuredPhone = process.env.CUSTOMER_SERVICE_PHONE;
+  const configuredPassword = process.env.CUSTOMER_SERVICE_PASSWORD;
   if (!configuredPhone || !configuredPassword) return false;
   const expectedPhone = normalizePhone(configuredPhone);
   const suppliedPhone = normalizePhone(phone);
@@ -37,13 +37,13 @@ export function verifyAdminCredentials(phone: string, password: string) {
   return phoneMatches && passwordMatches;
 }
 
-export async function setAdminSession() {
+export async function setCustomerServiceSession() {
   const issuedAt = Date.now();
   const nonce = randomBytes(16).toString("base64url");
   const payload = `${issuedAt}.${nonce}`;
   const token = `${payload}.${sign(payload)}`;
   const cookieStore = await cookies();
-  cookieStore.set(ADMIN_SESSION_COOKIE, token, {
+  cookieStore.set(CUSTOMER_SERVICE_SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -52,13 +52,13 @@ export async function setAdminSession() {
   });
 }
 
-export async function clearAdminSession() {
+export async function clearCustomerServiceSession() {
   const cookieStore = await cookies();
-  cookieStore.delete(ADMIN_SESSION_COOKIE);
+  cookieStore.delete(CUSTOMER_SERVICE_SESSION_COOKIE);
 }
 
-export async function isAdminAuthenticated() {
-  const token = (await cookies()).get(ADMIN_SESSION_COOKIE)?.value;
+export async function isCustomerServiceAuthenticated() {
+  const token = (await cookies()).get(CUSTOMER_SERVICE_SESSION_COOKIE)?.value;
   if (!token) return false;
   const parts = token.split(".");
   if (parts.length !== 3) return false;

@@ -25,29 +25,17 @@ export function getProductBySlug(slug: string) {
 }
 
 export const categories = [
-  { name: "Home", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=85" },
-  { name: "Kitchen", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=900&q=85" },
-  { name: "Wellness", image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=900&q=85" },
-  { name: "Accessories", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85" },
+  { name: "Men's Clothing", image: products.find((product) => product.category === "Men's Clothing")?.images[0] ?? "" },
+  { name: "Women's Clothing", image: products.find((product) => product.category === "Women's Clothing")?.images[0] ?? "" },
+  { name: "Home Appliances", image: products.find((product) => product.category === "Home Appliances")?.images[0] ?? "" },
+  { name: "Kitchenware", image: products.find((product) => product.category === "Kitchenware")?.images[0] ?? "" },
+  { name: "Building Materials", image: products.find((product) => product.category === "Building Materials")?.images[0] ?? "" },
 ];
 
 export const productCategories = [
-  "Women's Fashion",
-  "Bags & Purses",
-  "Accessories",
-  "Beauty & Cosmetics",
-  "Skincare",
-  "Jewelry & Accessories",
-  "Shoes",
-  "Loungewear",
-  "Haircare",
-  "Activewear",
-  "Lifestyle",
-  "Wellness",
-  "Home",
-  "Kitchen",
-  "Technology",
-  "Stationery",
-  "Travel",
-  "Pets",
+  "Men's Clothing",
+  "Women's Clothing",
+  "Home Appliances",
+  "Kitchenware",
+  "Building Materials",
 ];

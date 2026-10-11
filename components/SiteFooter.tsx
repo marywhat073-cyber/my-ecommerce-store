@@ -20,8 +20,8 @@ export function SiteFooter() {
           <h2 className="text-sm font-semibold">{t("footer.explore")}</h2>
           <div className="mt-4 grid gap-3 text-sm text-white/70">
             <Link href="/products">{t("footer.shopAll")}</Link>
-            <Link href="/products?category=Home">{t("footer.homeLiving")}</Link>
-            <Link href="/products?category=Wellness">{t("footer.wellness")}</Link>
+            <Link href="/products?category=Home%20Appliances">{t("footer.homeAppliances")}</Link>
+            <Link href="/products?category=Building%20Materials">{t("footer.buildingMaterials")}</Link>
           </div>
         </div>
         <div>

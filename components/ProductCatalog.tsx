@@ -8,7 +8,7 @@ import { useApp } from "@/context/AppContext";
 import { getProductCurrency, toMMK } from "@/lib/format";
 import { useLocale } from "@/context/LocaleContext";
 
-const MAX_PRICE = "1000000";
+const MAX_PRICE = "5000000";
 const PAGE_SIZE = 24;
 
 export function ProductCatalog({
@@ -69,7 +69,7 @@ export function ProductCatalog({
           <label className="block">
             <span className="mb-3 flex items-center justify-between text-sm font-semibold">{t("catalog.maxPrice")} <span className="font-normal text-muted">{`MMK ${Number(maxPrice).toLocaleString()}`}</span></span>
             <input aria-label={t("catalog.maxPrice")} type="range" min="0" max={MAX_PRICE} step="1" value={maxPrice} onChange={(event) => { setMaxPrice(event.target.value); setPage(1); }} className="w-full accent-forest" />
-            <span className="mt-1 flex justify-between text-xs text-muted"><span>MMK 10</span><span>MMK 1,000,000</span></span>
+            <span className="mt-1 flex justify-between text-xs text-muted"><span>MMK 10</span><span>MMK 5,000,000</span></span>
           </label>
           <label className="block">
             <span className="mb-3 block text-sm font-semibold">{t("catalog.search")}</span>
