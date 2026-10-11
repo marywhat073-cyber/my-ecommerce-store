@@ -19,23 +19,22 @@ export type Product = {
 };
 
 export const products = productData as Product[];
+export const MINIMUM_PRODUCT_PRICE_MMK = 300_000;
 
 export function getProductBySlug(slug: string) {
   return products.find((product) => product.slug === slug);
 }
 
 export const categories = [
-  { name: "Men's Clothing", image: products.find((product) => product.category === "Men's Clothing")?.images[0] ?? "" },
-  { name: "Women's Clothing", image: products.find((product) => product.category === "Women's Clothing")?.images[0] ?? "" },
-  { name: "Home Appliances", image: products.find((product) => product.category === "Home Appliances")?.images[0] ?? "" },
-  { name: "Kitchenware", image: products.find((product) => product.category === "Kitchenware")?.images[0] ?? "" },
-  { name: "Building Materials", image: products.find((product) => product.category === "Building Materials")?.images[0] ?? "" },
+  { name: "Tech, Phones & Computers", image: products.find((product) => product.category === "Tech, Phones & Computers")?.images[0] ?? "" },
+  { name: "Men's Fashion & Grooming", image: products.find((product) => product.category === "Men's Fashion & Grooming")?.images[0] ?? "" },
+  { name: "Women's Fashion, Clothing & Lingerie", image: products.find((product) => product.category === "Women's Fashion, Clothing & Lingerie")?.images[0] ?? "" },
+  { name: "Women's Makeup & Cosmetics", image: products.find((product) => product.category === "Women's Makeup & Cosmetics")?.images[0] ?? "" },
+  { name: "Skincare & Haircare", image: products.find((product) => product.category === "Skincare & Haircare")?.images[0] ?? "" },
+  { name: "Kitchen Appliances & Utensils", image: products.find((product) => product.category === "Kitchen Appliances & Utensils")?.images[0] ?? "" },
+  { name: "Home Cleaning, Decor & Building Materials", image: products.find((product) => product.category === "Home Cleaning, Decor & Building Materials")?.images[0] ?? "" },
 ];
 
 export const productCategories = [
-  "Men's Clothing",
-  "Women's Clothing",
-  "Home Appliances",
-  "Kitchenware",
-  "Building Materials",
+  ...categories.map((category) => category.name),
 ];

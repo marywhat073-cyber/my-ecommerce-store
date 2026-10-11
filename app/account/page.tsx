@@ -9,7 +9,15 @@ import { useLocale } from "@/context/LocaleContext";
 import { formatPrice, formatPricePair } from "@/lib/format";
 import { Store, Wallet } from "lucide-react";
 
-const listingCategories = ["Men's Clothing", "Women's Clothing", "Home Appliances", "Kitchenware", "Building Materials"];
+const listingCategories = [
+  "Tech, Phones & Computers",
+  "Men's Fashion & Grooming",
+  "Women's Fashion, Clothing & Lingerie",
+  "Women's Makeup & Cosmetics",
+  "Skincare & Haircare",
+  "Kitchen Appliances & Utensils",
+  "Home Cleaning, Decor & Building Materials",
+];
 
 export default function AccountPage() {
   const { user, sellerProducts, orders, addSellerProduct, logout, refreshStore } = useApp();
@@ -108,16 +116,17 @@ export default function AccountPage() {
             </div>
           </section>
           <div className="grid gap-4 rounded-xl bg-sage p-6 sm:grid-cols-2">
-            <div className="flex items-start gap-3"><Wallet className="mt-1 text-forest" /><div><p className="text-sm text-muted">{myanmar ? "ပိုက်ဆံအိတ်လက်ကျန်" : "Wallet balance"}</p><p className="mt-1 text-2xl font-semibold">{formatPrice(user.walletBalanceMMK)}</p></div></div>
+            <div className="flex items-start gap-3"><Wallet className="mt-1 text-forest" /><div><p className="text-sm text-muted">{myanmar ? "ပိုက်ဆံအိတ်လက်ကျန်" : "Wallet balance"}</p><p className="mt-1 text-xl font-semibold">{formatPrice(user.walletBalanceMMK)}</p></div></div>
             <div><p className="text-sm text-muted">{myanmar ? "ရောင်းချမှုအောင်မြင်ပြီး" : "Successful sales"}</p><p className="mt-1 text-2xl font-semibold">{user.successfulSales}</p></div>
             <div className="sm:col-span-2 rounded-lg bg-white/70 p-4 text-sm leading-6">
-              <strong>{user.signupBonusMMK ? formatPrice(user.signupBonusMMK) : formatPrice(0)} {myanmar ? "မှတ်ပုံတင်ဆုကြေး" : "signup bonus"}</strong>
-              <p className="mt-1 text-muted">{user.signupBonusMMK
+              <strong>{formatPrice(user.signupBonusMMK + user.referralBonusMMK)} {myanmar ? "ဖိတ်ခေါ်မှုဆုကြေးများ" : "referral bonuses"}</strong>
+              <p className="mt-1 text-muted">{user.signupBonusMMK + user.referralBonusMMK > 0
                 ? user.bonusUnlocked
                   ? (myanmar ? "အနည်းဆုံး အော်ဒါတစ်ခု ပို့ဆောင်ပြီး၍ ဆုကြေးကို ထုတ်ယူနိုင်ပါပြီ။" : "Unlocked: at least one successful sale has been delivered.")
-                  : (myanmar ? "ပထမဆုံး ထုတ်ကုန်ရောင်းချမှု အောင်မြင်စွာ ပို့ဆောင်ပြီးမှသာ ထုတ်ယူနိုင်ပါမည်။" : "Locked until at least one product sale is successfully delivered.")
-                : (myanmar ? "ဖိတ်ခေါ်ကုဒ် မှန်ကန်ပါက ဆုကြေးထည့်သွင်းပေးမည်။" : "A valid invitation code is required for the signup bonus.")}</p>
+                  : (myanmar ? "ပထမဆုံး ထုတ်ကုန်ရောင်းချမှု အောင်မြင်စွာ ပို့ဆောင်ပြီးမှသာ ဖိတ်ခေါ်ဆုကြေးများကို ထုတ်ယူနိုင်ပါမည်။" : "Locked until at least one product sale is successfully delivered.")
+                : (myanmar ? "တစ်ဦးဦးကို သင့်ကုဒ်ဖြင့် မှတ်ပုံတင်ရန် ဖိတ်ခေါ်ပါ။" : "Invite someone with your code to earn a referral bonus.")}</p>
             </div>
+            <div><p className="text-sm text-muted">{myanmar ? "သင့်ဖိတ်ခေါ်ကုဒ်" : "Your referral code"}</p><p className="mt-1 font-medium">{user.referralCode}</p><p className="mt-1 text-xs text-muted">{myanmar ? "ဖိတ်ခေါ်ထားသောဆိုင်တစ်ဆိုင် မှတ်ပုံတင်လျှင် ဆုကြေးရရှိပြီး၊ သင့်ဆိုင် အော်ဒါပို့ဆောင်ပြီးမှ ထုတ်ယူနိုင်ပါမည်။" : "Earn $30.00 (~ 135,000 MMK) for each referred store; your bonus unlocks after your store completes a delivered sale."}</p></div>
             <div><p className="text-sm text-muted">{myanmar ? "အသုံးပြုခဲ့သော ဖိတ်ခေါ်ကုဒ်" : "Invitation code used"}</p><p className="mt-1 font-medium">{user.invitationCode || "—"}</p></div>
             <div><p className="text-sm text-muted">{myanmar ? "စာရင်းသွင်းသည့်နေ့" : "Registered"}</p><p className="mt-1 font-medium">{new Date(user.createdAt).toLocaleDateString(language === "my" ? "my-MM" : "en-US")}</p></div>
           </div>
@@ -132,7 +141,8 @@ export default function AccountPage() {
                 <select name="category" className="form-select mt-2 w-full rounded-lg border-black/15">{listingCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
               </label>
               <label className="block text-sm">{myanmar ? "ကုန်ကျစရိတ် (MMK)" : "Product cost (MMK)"}
-                <input name="costPriceMMK" type="number" min="1" max="1000000000" step="1" required className="form-input mt-2 w-full rounded-lg border-black/15" />
+                <input name="costPriceMMK" type="number" min="300000" max="1000000000" step="1" required className="form-input mt-2 w-full rounded-lg border-black/15" />
+                <span className="mt-1 block text-xs text-muted">{myanmar ? "အနည်းဆုံး $66.67 (~ 300,000 MMK)" : "Minimum $66.67 (~ 300,000 MMK)"}</span>
               </label>
               <label className="block text-sm sm:col-span-2">{myanmar ? "အရည်အသွေးမြင့် ပုံ URL (HTTPS)" : "High-quality cover image URL (HTTPS)"}
                 <input name="imageUrl" type="url" required placeholder="https://images.unsplash.com/..." className="form-input mt-2 w-full rounded-lg border-black/15" />

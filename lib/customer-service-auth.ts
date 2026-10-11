@@ -2,20 +2,14 @@ import "server-only";
 
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { getSessionSecret } from "@/lib/local-session-secret";
 
 export const CUSTOMER_SERVICE_SESSION_COOKIE = "evergreen-customer-service-session";
 const SESSION_DURATION_SECONDS = 8 * 60 * 60;
 
-function sessionSecret() {
-  const secret = process.env.CUSTOMER_SERVICE_SESSION_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error("CUSTOMER_SERVICE_SESSION_SECRET must contain at least 32 characters.");
-  }
-  return secret;
-}
-
-function sign(value: string) {
-  return createHmac("sha256", sessionSecret()).update(value).digest("base64url");
+async function sign(value: string) {
+  const secret = await getSessionSecret("CUSTOMER_SERVICE_SESSION_SECRET", "customer-service");
+  return createHmac("sha256", secret).update(value).digest("base64url");
 }
 
 function normalizePhone(value: string) {
@@ -41,7 +35,7 @@ export async function setCustomerServiceSession() {
   const issuedAt = Date.now();
   const nonce = randomBytes(16).toString("base64url");
   const payload = `${issuedAt}.${nonce}`;
-  const token = `${payload}.${sign(payload)}`;
+  const token = `${payload}.${await sign(payload)}`;
   const cookieStore = await cookies();
   cookieStore.set(CUSTOMER_SERVICE_SESSION_COOKIE, token, {
     httpOnly: true,
@@ -68,7 +62,7 @@ export async function isCustomerServiceAuthenticated() {
   const age = Date.now() - issuedAt;
   if (age < 0 || age > SESSION_DURATION_SECONDS * 1000) return false;
   const payload = `${issuedAtText}.${nonce}`;
-  const expected = Buffer.from(sign(payload));
+  const expected = Buffer.from(await sign(payload));
   const supplied = Buffer.from(signature);
   return expected.length === supplied.length && timingSafeEqual(expected, supplied);
 }

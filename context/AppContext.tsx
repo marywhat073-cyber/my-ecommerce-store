@@ -18,8 +18,10 @@ export type AccountUser = {
   storeName: string;
   storeAddress: string;
   invitationCode: string;
+  referralCode: string;
   walletBalanceMMK: number;
   signupBonusMMK: number;
+  referralBonusMMK: number;
   bonusUnlocked: boolean;
   successfulSales: number;
   createdAt: string;

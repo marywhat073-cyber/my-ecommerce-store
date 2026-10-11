@@ -9,9 +9,7 @@ export function toMMK(price: number, currency: "USD" | "MMK" = "USD") {
 }
 
 export function formatPrice(price: number) {
-  return `MMK ${new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
-  }).format(Math.round(price))}`;
+  return formatPricePair(price, "MMK");
 }
 
 export function formatPricePair(price: number, currency: "USD" | "MMK" = "USD") {
@@ -20,7 +18,5 @@ export function formatPricePair(price: number, currency: "USD" | "MMK" = "USD") 
   const formattedMMK = `${new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0,
   }).format(Math.round(mmk))} MMK`;
-  return currency === "USD"
-    ? `$${usd.toFixed(2)} (~ ${formattedMMK})`
-    : `${formattedMMK} (~ $${usd.toFixed(2)})`;
+  return `$${usd.toFixed(2)} (~ ${formattedMMK})`;
 }

@@ -97,7 +97,7 @@ export default function HomePage() {
             <p className="mt-5 rounded-xl bg-sage/70 p-3 text-xs leading-5 text-ink/75">
               {myanmar
                 ? "မှတ်ပုံတင်ထားသော ဖိတ်ခေါ်ကုဒ်ဖြင့် $30 ဆုကြေးရရှိမည်။ အောင်မြင်သော အော်ဒါအနည်းဆုံးတစ်ခု ပို့ဆောင်ပြီးမှသာ ထုတ်ယူနိုင်ပါမည်။"
-                : "A valid invitation code adds a $30 wallet bonus. The bonus is locked until at least one product sale is successfully delivered."}
+                : "Every store gets a unique referral code. A valid referral gives both stores $30.00 (~ 135,000 MMK); each store's bonus unlocks after that store completes a delivered product sale."}
             </p>
           </div>
         </div>
@@ -123,12 +123,12 @@ export default function HomePage() {
         <div className="grid gap-4 rounded-xl bg-sage p-5 sm:grid-cols-3 sm:p-7">
           <div><p className="eyebrow">{myanmar ? "ဆိုင် ID" : "Store ID"}</p><p className="mt-2 font-semibold">{user.storeId}</p></div>
           <div><p className="eyebrow">{myanmar ? "ပိုက်ဆံအိတ်" : "Wallet balance"}</p><p className="mt-2 font-semibold">{formatPrice(user.walletBalanceMMK)}</p></div>
-          <div><p className="eyebrow">{myanmar ? "ဆုကြေးအခြေအနေ" : "Signup bonus"}</p><p className="mt-2 font-semibold">{user.signupBonusMMK ? (user.bonusUnlocked ? (myanmar ? "ထုတ်ယူနိုင်သည်" : "Unlocked") : (myanmar ? "အော်ဒါပို့ဆောင်ရန်လိုသည်" : "Locked until a sale is delivered")) : (myanmar ? "မရှိပါ" : "Not applicable")}</p></div>
+          <div><p className="eyebrow">{myanmar ? "ဖိတ်ခေါ်ဆုကြေးအခြေအနေ" : "Referral bonuses"}</p><p className="mt-2 font-semibold">{user.signupBonusMMK + user.referralBonusMMK ? (user.bonusUnlocked ? (myanmar ? "ထုတ်ယူနိုင်သည်" : "Unlocked") : (myanmar ? "အော်ဒါပို့ဆောင်ရန်လိုသည်" : "Locked until a sale is delivered")) : (myanmar ? "မရှိပါ" : "Not applicable")}</p></div>
         </div>
       </section>
       <section className="page-wrap py-10 md:py-14">
         <div className="mb-7"><p className="eyebrow">{t("home.categoryEyebrow")}</p><h2 className="section-title mt-2">{t("home.categoryTitle")}</h2></div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {categories.map((category) => <Link key={category.name} href={`/products?category=${encodeURIComponent(category.name)}`} className="group relative aspect-[5/4] overflow-hidden rounded-xl bg-sand">
             <Image src={category.image} alt={`${category.name} collection`} fill sizes="(max-width: 640px) 50vw, 20vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

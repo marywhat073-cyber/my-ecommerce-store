@@ -3,12 +3,12 @@
 import { useMemo, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
-import { productCategories, products } from "@/lib/products";
+import { MINIMUM_PRODUCT_PRICE_MMK, productCategories, products } from "@/lib/products";
 import { useApp } from "@/context/AppContext";
-import { getProductCurrency, toMMK } from "@/lib/format";
+import { getProductCurrency, MMK_PER_USD, toMMK } from "@/lib/format";
 import { useLocale } from "@/context/LocaleContext";
 
-const MAX_PRICE = "5000000";
+const MAX_PRICE = "60000000";
 const PAGE_SIZE = 24;
 
 export function ProductCatalog({
@@ -30,7 +30,8 @@ export function ProductCatalog({
     const allProducts = [...sellerProducts, ...products];
     const visible = allProducts.filter((product) => {
       const matchesCategory = category === "All" || product.category === category;
-      const matchesPrice = toMMK(product.price, getProductCurrency(product)) <= Number(maxPrice);
+      const priceMMK = toMMK(product.price, getProductCurrency(product));
+      const matchesPrice = priceMMK >= MINIMUM_PRODUCT_PRICE_MMK && priceMMK <= Number(maxPrice);
       const matchesSearch = `${product.name} ${product.category} ${product.description}`
         .toLowerCase()
         .includes(search.trim().toLowerCase());
@@ -67,9 +68,9 @@ export function ProductCatalog({
             </select>
           </label>
           <label className="block">
-            <span className="mb-3 flex items-center justify-between text-sm font-semibold">{t("catalog.maxPrice")} <span className="font-normal text-muted">{`MMK ${Number(maxPrice).toLocaleString()}`}</span></span>
-            <input aria-label={t("catalog.maxPrice")} type="range" min="0" max={MAX_PRICE} step="1" value={maxPrice} onChange={(event) => { setMaxPrice(event.target.value); setPage(1); }} className="w-full accent-forest" />
-            <span className="mt-1 flex justify-between text-xs text-muted"><span>MMK 10</span><span>MMK 5,000,000</span></span>
+            <span className="mb-3 flex items-center justify-between text-sm font-semibold">{t("catalog.maxPrice")} <span className="font-normal text-muted">{`$${(Number(maxPrice) / MMK_PER_USD).toFixed(2)} (~ MMK ${Number(maxPrice).toLocaleString()})`}</span></span>
+            <input aria-label={t("catalog.maxPrice")} type="range" min={String(MINIMUM_PRODUCT_PRICE_MMK)} max={MAX_PRICE} step="100000" value={maxPrice} onChange={(event) => { setMaxPrice(event.target.value); setPage(1); }} className="w-full accent-forest" />
+            <span className="mt-1 flex justify-between text-xs text-muted"><span>$66.67 (~ MMK 300,000)</span><span>$13,333.33 (~ MMK 60,000,000)</span></span>
           </label>
           <label className="block">
             <span className="mb-3 block text-sm font-semibold">{t("catalog.search")}</span>

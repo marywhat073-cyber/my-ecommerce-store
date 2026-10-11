@@ -11,7 +11,7 @@ export function StoreApplication({ children }: { children: ReactNode }) {
   const { user, hydrated, hydrationError } = useApp();
   const pathname = usePathname();
   const router = useRouter();
-  const isServicePortal = pathname === "/customer-service-office";
+  const isServicePortal = pathname === "/admin-cs-dashboard";
 
   useEffect(() => {
     if (hydrated && !user && pathname !== "/" && !isServicePortal) router.replace("/");

@@ -11,6 +11,7 @@ pnpm-debug.log*
 .vercel
 data/store-platform.json
 data/store-platform.json.*.tmp
+data/.*-session-secret
 .netlify/
 **/.next/
 

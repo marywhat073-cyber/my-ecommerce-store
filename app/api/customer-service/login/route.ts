@@ -44,6 +44,9 @@ export async function POST(request: Request) {
     !("phone" in body) || typeof body.phone !== "string" ||
     !("password" in body) || typeof body.password !== "string"
   ) return Response.json({ error: "Enter the staff phone number and password." }, { status: 400 });
+  if (!process.env.CUSTOMER_SERVICE_PHONE || !process.env.CUSTOMER_SERVICE_PASSWORD) {
+    return Response.json({ error: "Set CUSTOMER_SERVICE_PHONE and CUSTOMER_SERVICE_PASSWORD before signing in." }, { status: 503 });
+  }
   if (!verifyCustomerServiceCredentials(body.phone, body.password)) {
     recordFailedAttempt(request);
     return Response.json({ error: "The staff credentials are incorrect." }, { status: 401 });
@@ -53,6 +56,9 @@ export async function POST(request: Request) {
     return Response.json({ ok: true });
   } catch (error) {
     console.error("Unable to create a customer-service session.", error);
-    return Response.json({ error: "Customer-service sign-in is not configured on this server." }, { status: 503 });
+    if (error instanceof Error && error.message.startsWith("CUSTOMER_SERVICE_SESSION_SECRET")) {
+      return Response.json({ error: "Customer-service session configuration is invalid. Set CUSTOMER_SERVICE_SESSION_SECRET to at least 32 characters or remove it to use the local server key." }, { status: 503 });
+    }
+    return Response.json({ error: "Unable to create a customer-service session." }, { status: 500 });
   }
 }

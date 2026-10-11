@@ -11,13 +11,17 @@ import { promisify } from "node:util";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cookies } from "next/headers";
-import { products, type Product } from "@/lib/products";
+import { MINIMUM_PRODUCT_PRICE_MMK, products, type Product } from "@/lib/products";
+import { getSessionSecret } from "@/lib/local-session-secret";
 
 const scrypt = promisify(scryptCallback);
 const SESSION_COOKIE = "evergreen-store-session";
 const SESSION_SECONDS = 60 * 60 * 24 * 14;
 const SIGNUP_BONUS_MMK = 135_000;
-const storePath = path.join(process.cwd(), "data", "store-platform.json");
+const storeDataDirectory = process.env.STORE_PLATFORM_DATA_DIR
+  ? path.resolve(process.env.STORE_PLATFORM_DATA_DIR)
+  : path.join(process.cwd(), "data");
+const storePath = path.join(storeDataDirectory, "store-platform.json");
 
 export class StorePlatformError extends Error {}
 
@@ -31,6 +35,8 @@ export type StoreAccount = {
   registrationIp: string;
   walletBalanceMMK: number;
   signupBonusMMK: number;
+  referralBonusMMK: number;
+  referralCode: string;
   bonusUnlocked: boolean;
   successfulSales: number;
   createdAt: string;
@@ -61,7 +67,7 @@ export type SupportTicket = {
 type WalletEntry = {
   id: string;
   storeId: string;
-  action: "Deposit" | "Withdrawal" | "Sale";
+  action: "Deposit" | "Withdrawal" | "Sale" | "Referral Bonus";
   amountMMK: number;
   note: string;
   createdAt: string;
@@ -79,6 +85,29 @@ export type PublicStoreAccount = Omit<StoreAccount, "passwordHash" | "registrati
 
 function blankData(): PlatformData {
   return { accounts: [], products: [], orders: [], tickets: [], walletEntries: [] };
+}
+
+function createReferralCode(data: PlatformData) {
+  let referralCode = "";
+  do {
+    referralCode = `EVERGREEN-${randomBytes(4).toString("hex").toUpperCase()}`;
+  } while (data.accounts.some((account) => account.referralCode === referralCode));
+  return referralCode;
+}
+
+function migrateReferralAccounts(data: PlatformData) {
+  for (const account of data.accounts) {
+    if (!Number.isSafeInteger(account.referralBonusMMK)) account.referralBonusMMK = 0;
+    if (!account.referralCode) account.referralCode = createReferralCode(data);
+  }
+}
+
+async function ensureReferralAccounts() {
+  await pendingWrite;
+  const data = await readData();
+  if (data.accounts.every((account) => account.referralCode && Number.isSafeInteger(account.referralBonusMMK))) return data;
+  await updateData(() => undefined);
+  return readData();
 }
 
 let pendingWrite: Promise<void> = Promise.resolve();
@@ -113,6 +142,7 @@ async function writeData(data: PlatformData) {
 async function updateData<T>(update: (data: PlatformData) => T): Promise<T> {
   const operation = pendingWrite.then(async () => {
     const data = await readData();
+    migrateReferralAccounts(data);
     const result = update(data);
     await writeData(data);
     return result;
@@ -135,20 +165,15 @@ async function verifyPassword(password: string, stored: string) {
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 
-function sessionSecret() {
-  const secret = process.env.STORE_SESSION_SECRET;
-  if (!secret || secret.length < 32) throw new Error("STORE_SESSION_SECRET must contain at least 32 characters.");
-  return secret;
-}
-
-function sign(payload: string) {
-  return createHmac("sha256", sessionSecret()).update(payload).digest("base64url");
+async function sign(payload: string) {
+  const secret = await getSessionSecret("STORE_SESSION_SECRET", "store");
+  return createHmac("sha256", secret).update(payload).digest("base64url");
 }
 
 async function setSession(storeId: string) {
   const payload = `${storeId}.${Date.now()}.${randomBytes(16).toString("base64url")}`;
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, `${payload}.${sign(payload)}`, {
+  cookieStore.set(SESSION_COOKIE, `${payload}.${await sign(payload)}`, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -172,7 +197,7 @@ export async function getCurrentStoreId() {
   const age = Date.now() - issuedAt;
   if (age < 0 || age > SESSION_SECONDS * 1000) return null;
   const payload = `${storeId}.${issuedAtText}.${nonce}`;
-  const expected = Buffer.from(sign(payload));
+  const expected = Buffer.from(await sign(payload));
   const supplied = Buffer.from(signature);
   return expected.length === supplied.length && timingSafeEqual(expected, supplied) ? storeId : null;
 }
@@ -184,8 +209,10 @@ function publicAccount(account: StoreAccount): PublicStoreAccount {
     storeName: account.storeName,
     storeAddress: account.storeAddress,
     invitationCode: account.invitationCode,
+    referralCode: account.referralCode,
     walletBalanceMMK: account.walletBalanceMMK,
     signupBonusMMK: account.signupBonusMMK,
+    referralBonusMMK: account.referralBonusMMK,
     bonusUnlocked: account.bonusUnlocked,
     successfulSales: account.successfulSales,
     createdAt: account.createdAt,
@@ -195,8 +222,7 @@ function publicAccount(account: StoreAccount): PublicStoreAccount {
 export async function getCurrentStore(): Promise<PublicStoreAccount | null> {
   const storeId = await getCurrentStoreId();
   if (!storeId) return null;
-  await pendingWrite;
-  const data = await readData();
+  const data = await ensureReferralAccounts();
   const account = data.accounts.find((item) => item.storeId === storeId);
   return account ? publicAccount(account) : null;
 }
@@ -209,7 +235,7 @@ export async function registerStore(input: {
   invitationCode: string;
   registrationIp: string;
 }) {
-  sessionSecret();
+  await getSessionSecret("STORE_SESSION_SECRET", "store");
   const phone = input.phone.replace(/[^\d+]/g, "");
   const storeName = input.storeName.trim();
   const storeAddress = input.storeAddress.trim();
@@ -219,14 +245,21 @@ export async function registerStore(input: {
   if (storeAddress.length < 5 || storeAddress.length > 300) throw new StorePlatformError("Enter a complete store address.");
   if (input.password.length < 8 || input.password.length > 128) throw new StorePlatformError("Password must be between 8 and 128 characters.");
   if (invitationCode.length > 80) throw new StorePlatformError("Invitation code is too long.");
-  const validInvitationCode = process.env.STORE_INVITATION_CODE ?? "";
-  const suppliedCode = Buffer.from(invitationCode);
-  const configuredCode = Buffer.from(validInvitationCode);
-  const bonus = Boolean(invitationCode && validInvitationCode &&
-    suppliedCode.length === configuredCode.length && timingSafeEqual(suppliedCode, configuredCode));
   const passwordHash = await hashPassword(input.password);
   return updateData((data) => {
     if (data.accounts.some((account) => account.phone === phone)) throw new StorePlatformError("An account already uses this phone number.");
+    const referrer = invitationCode
+      ? data.accounts.find((account) => account.referralCode.toUpperCase() === invitationCode.toUpperCase())
+      : undefined;
+    const platformCode = process.env.STORE_INVITATION_CODE ?? "";
+    const suppliedCode = Buffer.from(invitationCode.toUpperCase());
+    const configuredCode = Buffer.from(platformCode.toUpperCase());
+    const platformInvitationValid = Boolean(invitationCode && platformCode &&
+      suppliedCode.length === configuredCode.length && timingSafeEqual(suppliedCode, configuredCode));
+    if (invitationCode && !referrer && !platformInvitationValid) {
+      throw new StorePlatformError("That referral code is not valid.");
+    }
+    const bonus = Boolean(referrer || platformInvitationValid);
     let storeId = "";
     do {
       storeId = `STORE-${randomBytes(6).toString("hex").toUpperCase()}`;
@@ -238,22 +271,47 @@ export async function registerStore(input: {
       storeName,
       storeAddress,
       invitationCode,
+      referralCode: createReferralCode(data),
       registrationIp: input.registrationIp.slice(0, 100),
       walletBalanceMMK: bonus ? SIGNUP_BONUS_MMK : 0,
       signupBonusMMK: bonus ? SIGNUP_BONUS_MMK : 0,
+      referralBonusMMK: 0,
       bonusUnlocked: false,
       successfulSales: 0,
       createdAt: new Date().toISOString(),
     };
     data.accounts.push(account);
+    if (referrer) {
+      referrer.walletBalanceMMK += SIGNUP_BONUS_MMK;
+      referrer.referralBonusMMK += SIGNUP_BONUS_MMK;
+      data.walletEntries.unshift({
+        id: `WAL-${randomUUID()}`,
+        storeId: referrer.storeId,
+        action: "Referral Bonus",
+        amountMMK: SIGNUP_BONUS_MMK,
+        note: `Referral bonus for store ${storeId}; locked until a successful delivered sale.`,
+        createdAt: new Date().toISOString(),
+      });
+    }
+    if (bonus) {
+      data.walletEntries.unshift({
+        id: `WAL-${randomUUID()}`,
+        storeId,
+        action: "Referral Bonus",
+        amountMMK: SIGNUP_BONUS_MMK,
+        note: referrer
+          ? `Signup bonus using referral code from ${referrer.storeId}; locked until a successful delivered sale.`
+          : "Signup bonus using the platform invitation code; locked until a successful delivered sale.",
+        createdAt: new Date().toISOString(),
+      });
+    }
     return publicAccount(account);
   });
 }
 
 export async function loginStore(phone: string, password: string) {
   const normalizedPhone = phone.replace(/[^\d+]/g, "");
-  await pendingWrite;
-  const data = await readData();
+  const data = await ensureReferralAccounts();
   const account = data.accounts.find((candidate) => candidate.phone === normalizedPhone);
   if (!account || !(await verifyPassword(password, account.passwordHash))) return null;
   await setSession(account.storeId);
@@ -266,7 +324,9 @@ export async function finishRegistrationSession(storeId: string) {
 
 export async function listStoreProducts() {
   await pendingWrite;
-  return (await readData()).products;
+  return (await readData()).products.filter((product) =>
+    toMMK(product.price, product.currency ?? "MMK") >= MINIMUM_PRODUCT_PRICE_MMK,
+  );
 }
 
 export async function addStoreProduct(storeId: string, input: {
@@ -278,10 +338,18 @@ export async function addStoreProduct(storeId: string, input: {
 }) {
   const name = input.name.trim();
   const description = input.description.trim();
-  const allowedCategories = ["Men's Clothing", "Women's Clothing", "Home Appliances", "Kitchenware", "Building Materials"];
+  const allowedCategories = [
+    "Tech, Phones & Computers",
+    "Men's Fashion & Grooming",
+    "Women's Fashion, Clothing & Lingerie",
+    "Women's Makeup & Cosmetics",
+    "Skincare & Haircare",
+    "Kitchen Appliances & Utensils",
+    "Home Cleaning, Decor & Building Materials",
+  ];
   if (name.length < 2 || name.length > 120 || description.length > 1000) throw new StorePlatformError("Enter valid product details.");
   if (!allowedCategories.includes(input.category)) throw new StorePlatformError("Choose a supported product category.");
-  if (!Number.isSafeInteger(input.costPriceMMK) || input.costPriceMMK < 1 || input.costPriceMMK > 1_000_000_000) throw new StorePlatformError("Enter a valid MMK product cost.");
+  if (!Number.isSafeInteger(input.costPriceMMK) || input.costPriceMMK < MINIMUM_PRODUCT_PRICE_MMK || input.costPriceMMK > 1_000_000_000) throw new StorePlatformError("Product cost must be at least MMK 300,000.");
   let image: URL;
   try {
     image = new URL(input.imageUrl);
@@ -327,6 +395,9 @@ export async function createStoreOrder(input: {
       if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) throw new StorePlatformError("Invalid product quantity.");
       const product = data.products.find((item) => item.id === productId) ?? products.find((item) => item.id === productId);
       if (!product) throw new StorePlatformError("One of the store-listed products is no longer available.");
+      if (toMMK(product.price, product.currency ?? "USD") < MINIMUM_PRODUCT_PRICE_MMK) {
+        throw new StorePlatformError("Product prices must be at least MMK 300,000.");
+      }
       if (product.sellerId === input.buyerStoreId) throw new StorePlatformError("A store cannot place orders for its own listings.");
       return {
         productId,
@@ -384,12 +455,11 @@ export async function createSupportTicket(storeId: string, message: string) {
 }
 
 export async function getServiceDashboard() {
-  await pendingWrite;
-  const data = await readData();
+  const data = await ensureReferralAccounts();
   return {
-    accounts: data.accounts.map(({ storeId, phone, storeName, storeAddress, invitationCode, registrationIp, walletBalanceMMK, signupBonusMMK, bonusUnlocked, successfulSales, createdAt }) => ({
-      storeId, phone, storeName, storeAddress, invitationCode, registrationIp, walletBalanceMMK, signupBonusMMK, bonusUnlocked, successfulSales, createdAt,
-      passwordStatus: "Scrypt hash stored server-side",
+    accounts: data.accounts.map(({ storeId, phone, storeName, storeAddress, invitationCode, referralCode, registrationIp, walletBalanceMMK, signupBonusMMK, referralBonusMMK, bonusUnlocked, successfulSales, createdAt }) => ({
+      storeId, phone, storeName, storeAddress, invitationCode, referralCode, registrationIp, walletBalanceMMK, signupBonusMMK, referralBonusMMK, bonusUnlocked, successfulSales, createdAt,
+      passwordStatus: "Hashed securely; never viewable",
     })),
     products: data.products,
     orders: data.orders,
@@ -414,7 +484,8 @@ export async function serviceAction(input: {
       if (input.action === "deposit" && !Number.isSafeInteger(account.walletBalanceMMK + amount)) {
         throw new StorePlatformError("This deposit would exceed the supported wallet balance.");
       }
-      if (input.action === "withdraw" && account.walletBalanceMMK - (!account.bonusUnlocked ? account.signupBonusMMK : 0) < amount) {
+      const lockedBonus = account.bonusUnlocked ? 0 : account.signupBonusMMK + account.referralBonusMMK;
+      if (input.action === "withdraw" && account.walletBalanceMMK - lockedBonus < amount) {
         throw new StorePlatformError("The available wallet balance is insufficient or includes a locked signup bonus.");
       }
       account.walletBalanceMMK += input.action === "deposit" ? amount : -amount;
@@ -441,7 +512,7 @@ export async function serviceAction(input: {
         const payout = item.costPriceMMK * item.quantity + Math.round(item.costPriceMMK * item.quantity * 0.1);
         seller.walletBalanceMMK += payout;
         seller.successfulSales += item.quantity;
-        if (seller.signupBonusMMK > 0) seller.bonusUnlocked = true;
+        if (seller.signupBonusMMK + seller.referralBonusMMK > 0) seller.bonusUnlocked = true;
         data.walletEntries.unshift({
           id: `WAL-${randomUUID()}`,
           storeId: seller.storeId,

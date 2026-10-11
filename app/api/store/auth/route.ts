@@ -97,8 +97,8 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof StorePlatformError) return Response.json({ error: error.message }, { status: 400 });
     if (error instanceof Error && error.message.startsWith("STORE_SESSION_SECRET")) {
-      console.error("Store session is not configured.", error);
-      return Response.json({ error: "Store sign-in is not configured on this server." }, { status: 503 });
+      console.error("Store session secret configuration is invalid.", error);
+      return Response.json({ error: "Store session configuration is invalid. Set STORE_SESSION_SECRET to at least 32 characters or remove it to use the local server key." }, { status: 503 });
     }
     console.error("Unable to process store account request.", error);
     return Response.json({ error: "Unable to process store account request." }, { status: 500 });
