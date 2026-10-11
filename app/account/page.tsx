@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { ArrowRight, Eye, EyeOff, Store, Wallet } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import type { Product } from "@/lib/products";
+import { productCategories, type Product } from "@/lib/products";
 import { formatPrice } from "@/lib/format";
 import { countryPhoneCodes, defaultCountryCode, type CountryPhoneCode } from "@/lib/countries";
 import { useLocale } from "@/context/LocaleContext";
-
-const categories = ["Home", "Kitchen", "Wellness", "Accessories", "Stationery"];
 
 export default function AccountPage() {
   const {
@@ -296,7 +294,7 @@ export default function AccountPage() {
                 <fieldset>
                   <legend className="mb-2 text-sm">{t("account.productCategories")}</legend>
                   <div className="grid grid-cols-2 gap-2">
-                    {categories.map((category) => (
+                    {productCategories.map((category) => (
                       <label key={category} className="flex items-center gap-2 rounded-lg border border-black/10 p-3 text-sm">
                         <input
                           type="checkbox"

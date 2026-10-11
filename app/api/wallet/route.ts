@@ -1,4 +1,5 @@
 import { createAdminTransaction, getAdminUserBalance } from "@/lib/admin-store";
+import { isSameOrigin } from "@/lib/request-origin";
 
 const requestTimes = new Map<string, number[]>();
 const RATE_LIMIT = 5;
@@ -11,16 +12,6 @@ const DEFAULT_ADMIN_CHAT_ID = "8074618542";
 
 function jsonError(message: string, status: number) {
   return Response.json({ error: message }, { status });
-}
-
-function isSameOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  try {
-    return new URL(origin).origin === new URL(request.url).origin;
-  } catch {
-    return false;
-  }
 }
 
 function isRateLimited(request: Request) {

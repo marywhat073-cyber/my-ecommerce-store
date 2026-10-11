@@ -39,7 +39,7 @@ export function ProductDetails({
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <span className="text-lg font-medium">{formatPricePair(product.price, getProductCurrency(product))}</span>
             {product.compareAtPrice && <span className="text-sm text-muted line-through">{formatPricePair(product.compareAtPrice, getProductCurrency(product))}</span>}
-            <span className="flex items-center gap-1 border-l border-black/15 pl-3 text-sm text-muted"><Star size={14} className="fill-amber-500 text-amber-500" /> {product.rating} · {product.reviewCount} {t("product.reviews")}</span>
+            {product.reviewCount > 0 && <span className="flex items-center gap-1 border-l border-black/15 pl-3 text-sm text-muted"><Star size={14} className="fill-amber-500 text-amber-500" /> {product.rating} · {product.reviewCount} {t("product.reviews")}</span>}
           </div>
           <p className="mt-6 text-sm leading-7 text-ink/75">{product.description}</p>
           <ul className="mt-5 space-y-2.5">

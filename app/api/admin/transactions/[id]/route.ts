@@ -1,15 +1,6 @@
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { reviewAdminTransaction } from "@/lib/admin-store";
-
-function isSameOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  try {
-    return new URL(origin).origin === new URL(request.url).origin;
-  } catch {
-    return false;
-  }
-}
+import { isSameOrigin } from "@/lib/request-origin";
 
 export async function PATCH(
   request: Request,

@@ -30,6 +30,7 @@ To create and run a production build, use `npm run build` followed by `npm start
 
 - Home page with product search, category links, featured picks, and a hero banner.
 - Product catalog with category and maximum-price filters, text search, and sorting.
+- Catalog of 648 sample products, including 640 generated listings across women's fashion, bags, beauty, skincare, jewelry, footwear, activewear, lifestyle, and home categories. The catalog uses paginated results for browsing.
 - Product pages with an image gallery, quantity selector, and add-to-cart action.
 - Persistent cart with quantity controls, removal, a demo promo code (`WELCOME10`), and estimated 8% tax.
 - Phone-number account registration/sign-in with an automatically assigned local User ID.
@@ -50,6 +51,8 @@ Account credentials, listings, wallet balances, transactions, and orders are sto
 The admin ledger is a separate local JSON file at `data/admin-store.json`. It is intended only for a single persistent local server instance. Registered user profile details are synchronized from the browser-local demo account, so this view is not a trusted identity directory. The admin ledger balance is updated on approved requests; it does not turn the browser-local account system into server-authenticated banking or payment processing. Do not deploy this prototype for real funds or sensitive production data. The user password and any password hash are not included in the admin file or dashboard.
 
 For local admin access, set `ADMIN_PHONE`, `ADMIN_PASSWORD`, and a random `ADMIN_SESSION_SECRET` of at least 32 characters in `.env.local`; `.env.local` is ignored by Git. To enable Telegram notifications, set `TELEGRAM_BOT_TOKEN` using a new, server-only bot credential. The administrator chat ID defaults to `8074618542` and can be overridden with `TELEGRAM_ADMIN_CHAT_ID`. Never commit credentials or expose them through `NEXT_PUBLIC_*` variables. Revoke and replace any bot token shared in chat, logs, or source control.
+
+Admin sign-in checks the request origin against the browser-facing host and protocol, including `Host`/`X-Forwarded-Host` and `X-Forwarded-Proto` values used by local reverse proxies. It does not enable cross-origin access; configure a proxy to forward the public host/protocol correctly.
 
 Before launch, connect a trusted server for authentication, durable user/order data, seller access controls, image storage, delivery workflows, and payment-provider integrations. Enforce authorization and validate all data on the server.
 

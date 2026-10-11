@@ -1,18 +1,9 @@
 import { setAdminSession, verifyAdminCredentials } from "@/lib/admin-auth";
+import { isSameOrigin } from "@/lib/request-origin";
 
 const attempts = new Map<string, { count: number; expiresAt: number }>();
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 10 * 60 * 1000;
-
-function isSameOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  if (!origin) return false;
-  try {
-    return new URL(origin).origin === new URL(request.url).origin;
-  } catch {
-    return false;
-  }
-}
 
 function isRateLimited(request: Request) {
   const client = request.headers.get("x-real-ip") ||

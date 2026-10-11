@@ -30,3 +30,24 @@ export const categories = [
   { name: "Wellness", image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=900&q=85" },
   { name: "Accessories", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85" },
 ];
+
+export const productCategories = [
+  "Women's Fashion",
+  "Bags & Purses",
+  "Accessories",
+  "Beauty & Cosmetics",
+  "Skincare",
+  "Jewelry & Accessories",
+  "Shoes",
+  "Loungewear",
+  "Haircare",
+  "Activewear",
+  "Lifestyle",
+  "Wellness",
+  "Home",
+  "Kitchen",
+  "Technology",
+  "Stationery",
+  "Travel",
+  "Pets",
+];

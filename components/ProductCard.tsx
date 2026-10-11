@@ -31,9 +31,9 @@ export function ProductCard({ product }: { product: Product }) {
         <div>
           <Link href={`/products/${product.slug}`} className="font-medium hover:text-leaf">{product.name}</Link>
           <p className="mt-1 text-sm text-muted">{t(`category.${product.category}`)}</p>
-          <p className="mt-2 flex items-center gap-1 text-xs text-muted">
+          {product.reviewCount > 0 && <p className="mt-2 flex items-center gap-1 text-xs text-muted">
             <Star size={13} className="fill-amber-500 text-amber-500" /> {product.rating} <span>({product.reviewCount})</span>
-          </p>
+          </p>}
         </div>
         <div className="shrink-0 pt-0.5 text-right text-xs font-medium">
           <span>{formatPricePair(product.price, getProductCurrency(product))}</span>
